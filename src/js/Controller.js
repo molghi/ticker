@@ -15,6 +15,9 @@ const Visual = new View();
 
 // runs on app start
 function init() {
+    Visual.renderTicker("timer");
+    Visual.renderColorBtn();
+    Visual.handleColorClick(changeAccentColor);
     runEventListeners();
 }
 init();
@@ -22,7 +25,18 @@ init();
 // ================================================================================================
 
 // running event listeners
-function runEventListeners() {}
+function runEventListeners() {
+    Visual.handleTopControls(); // handle clicks on "Timer", "Stopwatch", or "Until"
+}
+
+// ================================================================================================
+
+function changeAccentColor() {
+    const answer = prompt("Type your new interface color:");
+    if (answer === null) return;
+    if (answer && answer.trim().length < 3) return;
+    console.log(`change the accent color to:`, answer);
+}
 
 // ================================================================================================
 

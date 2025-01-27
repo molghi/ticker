@@ -1,10 +1,13 @@
-$accent: #32cd32; /* slightly paler than 'lime' but brighter than 'green' */
+// $accent: #32cd32; /* slightly paler than 'lime' but brighter than 'green' */
+$accent: DodgerBlue;
 $bg: #000;
+$alarm: #ff0000;
 $fontsize: 16px;
 
 :root {
     --accent: #{$accent};
     --bg: #{$bg};
+    --alarm: #{$alarm};
     --fontsize: #{$fontsize};
 }
 
@@ -17,6 +20,11 @@ $fontsize: 16px;
     margin: 0;
     border: 0;
     box-sizing: border-box;
+}
+
+html,
+body {
+    overflow: hidden;
 }
 
 body {
@@ -39,11 +47,11 @@ textarea {
     outline: none;
     padding: 10px;
     font-size: inherit;
-    transition: box-shadow 0.3s;
+    transition: box-shadow 0.2s;
 }
 
 button {
-    transition: all 0.3s;
+    // transition: all 0.3s;
 }
 
 input:focus,
@@ -110,3 +118,27 @@ $md4: 479.98; // for small phones
 }
 
 // =============================================================================================
+
+h1 {
+    text-align: center;
+    padding: 15px 0;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+    margin-bottom: 50px;
+    &:hover {
+        opacity: 1;
+    }
+}
+
+// ================================================================================================
+
+// disabling the up/down arrows on a number input
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}

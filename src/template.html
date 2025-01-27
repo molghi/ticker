@@ -9,10 +9,26 @@
         <link rel="icon" href="./favicon.ico" type="image/x-icon" />
         <title><%= htmlWebpackPlugin.options.title %></title>
     </head>
-    <body>
+    <body style="background-color: #000">
         <div class="section">
             <div class="container">
                 <h1><%= htmlWebpackPlugin.options.title %></h1>
+
+                <div class="app">
+                    <div class="app__controls">
+                        <button id="timer-btn" class="app__control-btn active">Timer</button>
+                        <button id="stopwatch-btn" class="app__control-btn">Stopwatch</button>
+                        <button id="till-btn" class="app__control-btn" title="Count until a specific time point in the future">
+                            Until
+                        </button>
+                    </div>
+
+                    <div class="app__section app__timer"></div>
+                    <div class="app__section app__stopwatch"></div>
+                    <div class="app__section app__till"></div>
+
+                    <div class="app__bottom-controls"></div>
+                </div>
             </div>
         </div>
     </body>

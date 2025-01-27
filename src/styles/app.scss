@@ -1,0 +1,89 @@
+@use "./initial";
+
+// NOTE: because I import with 'use' and not 'import' (which is deprecated), I must use this syntax now: @media (max-width: #{initial.$md3}px) { ... }
+
+.app {
+    &__controls {
+        // btns styles
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 100px;
+    }
+
+    &__control-btn {
+        padding: 15px 20px;
+        font-size: 18px;
+        &:nth-child(2) {
+            border-right-width: 0px;
+            border-left-width: 0px;
+        }
+    }
+
+    &__section {
+    }
+
+    &__timer {
+    }
+
+    &__stopwatch {
+    }
+
+    &__till {
+    }
+
+    &__bottom-controls {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+// ================================================================================================
+
+.active {
+    background-color: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 5px var(--accent);
+}
+
+.color-changer {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    display: inline-block;
+    div {
+        border-radius: 50%;
+        background-color: var(--accent);
+        width: 33px;
+        height: 33px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        opacity: 0.3;
+        transition: opacity 0.2s;
+        svg {
+            width: 18px;
+            path {
+                fill: var(--bg);
+            }
+        }
+        &:hover {
+            opacity: 1;
+            box-shadow: none;
+            background-color: var(--accent);
+        }
+        &:active {
+            opacity: 0.5;
+        }
+    }
+}
+
+// ================================================================================================
+
+.hidden {
+    display: none !important;
+}

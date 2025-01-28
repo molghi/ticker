@@ -7,6 +7,7 @@
     justify-content: center;
     column-gap: 40px;
     text-align: center;
+    transition: all 0.3s;
 }
 
 .ticker-block {
@@ -78,6 +79,7 @@
     justify-content: center;
     column-gap: 30px;
     margin-bottom: 60px;
+    transition: all 0.3s;
 }
 
 .ticker-element-command {
@@ -121,4 +123,26 @@
     &:hover {
         opacity: 1;
     }
+}
+
+.working {
+    transform: scale(2.5) translateY(20px);
+    position: relative;
+    pointer-events: none;
+}
+
+.obscured {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.dimmed {
+    opacity: 0.25;
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.moved-down {
+    transform: translateY(50px);
 }

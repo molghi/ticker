@@ -1,27 +1,38 @@
 import { Visual } from "../../Controller.js";
 import { paintRollerIcon } from "./icons.js";
-import { handleTickerBtnsCallback, handleStartStopCallback } from "./eventHandlers.js";
+import {
+    handleTickerBtnsCallback,
+    handleStartStopCallback,
+    handleQuickOptionsCallback,
+    handleTickerInputCallback,
+} from "./eventHandlers.js";
 
 // ================================================================================================
 
 // rendering the big ticker element: hours, minutes and maybe seconds too
 function renderTicker(renderWhere, secondsFlag = false) {
     if (document.querySelector(".ticker-element")) {
-        document.querySelector(".ticker-element").removeEventListener("click", handleTickerBtnsCallback); // removing the event listener
-        document.querySelector(".ticker-element").remove(); // removing before rendering/re-rendering
+        // removing event listeners first
+        document.querySelector(".ticker-element").removeEventListener("click", handleTickerBtnsCallback);
+        document.querySelector(".ticker-element-options").removeEventListener("click", handleQuickOptionsCallback);
+        [...document.querySelectorAll(".ticker-element input")].forEach((inputEl) =>
+            inputEl.removeEventListener("input", handleTickerInputCallback)
+        );
+        document.querySelector(".ticker-element").remove(); // removing the el before rendering/re-rendering
     }
 
     const div = document.createElement("div");
     div.classList.add("ticker-element");
 
-    const elements = secondsFlag ? ["Hours", "Minutes", "Seconds"] : ["Hours", "Minutes"]; // if secondsFlag is true, render seconds block too
+    // const elements = secondsFlag ? ["Hours", "Minutes", "Seconds"] : ["Hours", "Minutes"]; // if secondsFlag is true, render seconds block too
+    const elements = ["Hours", "Minutes", "Seconds"];
 
     const html = elements
         .map((elName) => {
             return `<div class="ticker-block ticker-block--${elName.toLowerCase()}">
         <div class="ticker-block-label">${elName}</div>
         <div class="ticker-block-input">
-            <input type="text" min="0" value="00">
+            <input type="text" min="0" value="00" maxlength="2">
         </div>
         <div class="ticker-block-btns">
             <button class="ticker-block-btn ticker-block-btn--decrease">-</button>
@@ -36,6 +47,8 @@ function renderTicker(renderWhere, secondsFlag = false) {
     if (renderWhere === "timer") Visual.timerBlock.appendChild(div);
     else if (renderWhere === "stopwatch") Visual.stopwatchBlock.appendChild(div);
     else if (renderWhere === "till" || renderWhere === "until") Visual.tillBlock.appendChild(div);
+
+    if (!secondsFlag) document.querySelector(".ticker-block--seconds").classList.add("hidden");
 
     renderStartStopBtns(); // rendering start stop btns
 

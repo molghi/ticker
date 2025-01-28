@@ -6,14 +6,14 @@ class KeyCommands {
     }
 
     listen() {
-        document.addEventListener("keydown", function (event) {
+        document.addEventListener("keydown", function (e) {
             // 'keypress' is deprecated
-            if (event.code === "KeyZ") {
-                const newCol = prompt("Enter a new UI colour:");
-                if (!newCol) return;
-                document.documentElement.style.setProperty("--accent", newCol); // changing the accent colour
-                console.log(`UI accent colour now: ${newCol}`);
-            }
+
+            let currentCase;
+            const minutesInput = document.querySelector(".ticker-block--minutes input");
+            if (e.code === "Equal") currentCase = "increase minutes";
+            if (e.code === "Minus") currentCase = "decrease minutes";
+            Visual.timerVisualLogic(minutesInput, currentCase);
         });
     }
 }

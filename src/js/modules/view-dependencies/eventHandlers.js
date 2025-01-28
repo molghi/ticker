@@ -44,7 +44,7 @@ function handleColorClick(handler) {
 
 // handle plus and minus btns of Hours or Minutes
 function handleTickerBtns() {
-    document.querySelector(".ticker-element").addEventListener("click", handleTickerBtnsCallback);
+    document.querySelector(".ticker-element").addEventListener("click", handleTickerBtnsCallback); // I remove it in renderMethods.js
 }
 
 // dependency of 'handleTickerBtns'
@@ -54,17 +54,37 @@ function handleTickerBtnsCallback(e) {
     const clickedBtnType = clickedBtn.textContent.trim() === `+` ? "increase" : "decrease"; // determining clicked btn type
     const clickedItem = clickedBtn.closest(".ticker-block"); // to determine if it is a btn of Hours or Minutes
     const clickedItemType = clickedItem.classList.contains("ticker-block--hours") ? "hours" : "minutes";
-    const inputValue = clickedBtn.parentElement.previousElementSibling.querySelector("input").value; // getting the input value
-    console.log(`btn clicked:`, clickedBtnType);
-    console.log(`clicked on:`, clickedItemType);
-    console.log(`current input value:`, inputValue);
+    const input = clickedBtn.parentElement.previousElementSibling.querySelector("input"); // if we clicked on the plus btn in Minutes, this input is the minutes input and vice versa
+    const concatted = `${clickedBtnType} ${clickedItemType}`; // concatting to handle cases
+    Visual.timerVisualLogic(input, concatted); // handling the cases
+}
+
+// ================================================================================================
+
+// handle typing in any .ticker-element input
+function handleTickerInput() {
+    const allTickerInputs = [...document.querySelectorAll(".ticker-element input")];
+    allTickerInputs.forEach((inputEl) => {
+        inputEl.addEventListener("input", handleTickerInputCallback); // I remove it in renderMethods.js
+    });
+}
+
+// dependency of 'handleTickerInput'
+function handleTickerInputCallback(e) {
+    const acceptedValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", undefined];
+    // if input was just one char, inputValue[1] returns undefined, that's why undef is in acceptedValues
+    const inputValue = e.target.value;
+    const replaceValue = "0";
+    // making sure it doesn't contain any unaccepted characters
+    if (!acceptedValues.includes(inputValue[0])) e.target.value = replaceValue + e.target.value.slice(1, 2);
+    if (!acceptedValues.includes(inputValue[1])) e.target.value = e.target.value.slice(0, 1) + replaceValue;
 }
 
 // ================================================================================================
 
 // handle start/stop btns
 function handleStartStop() {
-    document.querySelector(".ticker-element-commands").addEventListener("click", handleStartStopCallback);
+    document.querySelector(".ticker-element-commands").addEventListener("click", handleStartStopCallback); // I remove it in renderMethods.js
 }
 
 // dependency of 'handleStartStop'
@@ -72,14 +92,38 @@ function handleStartStopCallback(e) {
     if (!e.target.classList.contains("ticker-element-command")) return;
     const clickedBtn = e.target;
     const clickedBtnType = clickedBtn.textContent.trim().toLowerCase() === `start` ? "start" : "stop"; // determining clicked btn type
-    console.log(clickedBtnType);
+    if (clickedBtnType === "start") {
+        const valuesArr = Visual.readValues();
+        // Emitting a custom event
+        const customEvent = new CustomEvent("clockstarts", { detail: { inputValues: valuesArr } });
+        document.dispatchEvent(customEvent);
+    } else {
+        const customEvent = new CustomEvent("clockstops");
+        document.dispatchEvent(customEvent);
+    }
+}
+
+// ================================================================================================
+
+// listening to my custom event 'clockstarts' that happens when I click start to start a countdown
+function handleStartClick(handler) {
+    document.addEventListener("clockstarts", function (e) {
+        handler(e.detail.inputValues);
+    });
+}
+
+// listening to my custom event 'clockstops' that happens when I click stop to stop a countdown
+function handleStopClick(handler) {
+    document.addEventListener("clockstops", function (e) {
+        handler();
+    });
 }
 
 // ================================================================================================
 
 // handle clicks on quick options
 function handleQuickOptions() {
-    document.querySelector(".ticker-element-options").addEventListener("click", handleQuickOptionsCallback);
+    document.querySelector(".ticker-element-options").addEventListener("click", handleQuickOptionsCallback); // I remove it in renderMethods.js
 }
 
 function handleQuickOptionsCallback(e) {
@@ -99,4 +143,8 @@ export {
     handleStartStopCallback,
     handleQuickOptions,
     handleQuickOptionsCallback,
+    handleTickerInput,
+    handleTickerInputCallback,
+    handleStartClick,
+    handleStopClick,
 };

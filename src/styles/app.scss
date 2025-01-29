@@ -34,6 +34,14 @@
     }
 
     &__stopwatch {
+        .ticker-element {
+            input {
+                pointer-events: none;
+            }
+            .ticker-block-btns {
+                display: none;
+            }
+        }
     }
 
     &__till {

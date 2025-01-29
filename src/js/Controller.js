@@ -60,22 +60,37 @@ function changeAccentColor() {
 
 // happens when I click start to start a countdown
 function startCountHandler(inputValuesArr) {
-    const asNumbers = inputValuesArr.map((el) => +el);
+    const asNumbers = inputValuesArr.map((el) => +el); // transforming into numbers
+    const activeBlock = [...document.querySelectorAll(".app__controls button")]
+        .find((el) => el.classList.contains("active"))
+        .textContent.toLowerCase(); // finding what block is active now: timer, stopwatch or until
 
-    if (asNumbers.reduce((a, b) => a + b, 0) === 0) {
+    if (activeBlock === "timer" && asNumbers.reduce((a, b) => a + b, 0) === 0) {
         return alert("You cannot start a timer for 0 hours 0 minutes"); // showing a message if I'm starting a countdown with all zeroes as values
+    } else if (activeBlock === "timer") {
+        Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
+        Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
+        Visual.changeStartBtnText("pause");
+        Visual.toggleOptionSaveBtn("hide");
+    } else if (activeBlock === "stopwatch") {
+        Logic.resetStopwatchValues();
+        Logic.startIntervalStopwatch(Visual.showTicking);
+        Visual.changeStartBtnText("pause");
     }
+}
 
-    Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
-    Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
-    Visual.changeStartBtnText("pause");
-    Visual.toggleOptionSaveBtn("hide");
+function logger([h, m, s]) {
+    console.log(h, m, s);
 }
 
 // ================================================================================================
 
 // happens when I click stop to stop a countdown
 function stopCountHandler() {
+    const activeBlock = [...document.querySelectorAll(".app__controls button")]
+        .find((el) => el.classList.contains("active"))
+        .textContent.toLowerCase(); // finding what block is active now: timer, stopwatch or until
+
     Logic.stopTimer(); // stopping all interval timers
     document.querySelector(".ticker-element").classList.remove("working"); // decrease the size of the ticker element
     document.querySelector(".ticker-element").classList.remove("paused"); // removing the blinking class
@@ -85,6 +100,10 @@ function stopCountHandler() {
     Logic.resetTimerValues(); // reset in state
     Visual.updateTitle(undefined, "restore"); // put 'Ticker' back in the title
     Visual.changeStartBtnText("start"); // changing the text of Start btn
+
+    if (activeBlock === "stopwatch") {
+        Visual.toggleSecondsBlock("show");
+    }
 }
 
 // ================================================================================================
@@ -101,9 +120,21 @@ function pauseCountHandler(inputValuesArr) {
 // happens when I click resume to resume a countdown
 function resumeCountHandler(inputValuesArr) {
     const asNumbers = inputValuesArr.map((el) => +el);
+    const activeBlock = [...document.querySelectorAll(".app__controls button")]
+        .find((el) => el.classList.contains("active"))
+        .textContent.toLowerCase(); // finding what block is active now: timer, stopwatch or until
+
     document.querySelector(".ticker-element").classList.remove("paused"); // removing the blinking class
-    Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
-    Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
+
+    if (activeBlock === "timer") {
+        Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
+        Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
+    } else if (activeBlock === "stopwatch") {
+        console.log(`resume stopwatch`);
+        console.log(Logic.getState().stopwatch);
+        console.log(asNumbers);
+        Logic.startIntervalStopwatch(Visual.showTicking);
+    }
 }
 
 // ================================================================================================

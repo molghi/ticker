@@ -9,6 +9,9 @@ class Model {
             currentValues: [],
             quickOptions: [],
         },
+        stopwatch: {
+            currentValues: [0, 0, 0],
+        },
         accentColor: "",
     };
 
@@ -19,6 +22,10 @@ class Model {
     }
 
     // ================================================================================================
+
+    getState = () => this.#state;
+
+    resetStopwatchValues = () => (this.#state.stopwatch.currentValues = [0, 0, 0]);
 
     getTimerCurrentValues = () => this.#state.timer.currentValues;
 
@@ -76,7 +83,7 @@ class Model {
         handler(this.#state.timer.currentValues);
         this.#state.runningTimer = setInterval(() => {
             const [hours, minutes, seconds] = this.timerLogic(); // decreasing values (hours, minutes, seconds) happens here
-            handler([hours, minutes, seconds]);
+            handler([hours, minutes, seconds], "timer");
         }, 1000); // every second
     }
 
@@ -112,6 +119,38 @@ class Model {
         this.#state.timer.currentValues = [];
         this.#state.timer.currentValues.push(hours, minutes, seconds);
 
+        return [hours, minutes, seconds];
+    }
+
+    // ================================================================================================
+
+    startIntervalStopwatch(handler) {
+        clearInterval(this.#state.runningTimer); // clearing first before setting
+
+        handler(this.#state.stopwatch.currentValues);
+
+        this.#state.runningTimer = setInterval(() => {
+            const [hours, minutes, seconds] = this.stopwatchLogic(); // increasing values (hours, minutes, seconds) happens here
+            handler([hours, minutes, seconds], "stopwatch");
+        }, 1000); // every second
+    }
+
+    // ================================================================================================
+
+    stopwatchLogic() {
+        let [hours, minutes, seconds] = this.#state.stopwatch.currentValues;
+
+        seconds += 1;
+        if (seconds > 59) {
+            seconds = 0;
+            minutes += 1;
+            if (minutes > 59) {
+                minutes = 0;
+                hours += 1;
+            }
+        }
+
+        this.#state.stopwatch.currentValues = [hours, minutes, seconds];
         return [hours, minutes, seconds];
     }
 

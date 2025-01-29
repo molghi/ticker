@@ -209,7 +209,7 @@ class View {
 
     // ================================================================================================
 
-    showTicking = (arr) => {
+    showTicking = (arr, type) => {
         const allInputs = [...document.querySelectorAll(".ticker-element input")];
         document.querySelector(".ticker-block--seconds").classList.remove("hidden"); // unhiding the seconds block
         allInputs.forEach((input, i) => (input.value = arr[i].toString().padStart(2, 0))); // updating input values
@@ -217,7 +217,7 @@ class View {
         this.toggleInterfaceDimmer("dimmer");
         this.updateTitle(arr);
 
-        if (arr.join("") === "000") {
+        if (arr.join("") === "000" && type === "timer") {
             this.playSound();
             console.log(
                 `The countdown has finished at ${new Date().getHours()}:${new Date().getMinutes().toString().padStart(2, 0)}`

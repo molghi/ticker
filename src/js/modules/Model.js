@@ -9,11 +9,13 @@ class Model {
             currentValues: [],
             quickOptions: [],
         },
+        accentColor: "",
     };
 
     constructor() {
         this.getQuickOptions(); // from LS
         console.log(`state:`, this.#state);
+        this.getAccentColor(); // from LS
     }
 
     // ================================================================================================
@@ -112,6 +114,46 @@ class Model {
 
         return [hours, minutes, seconds];
     }
+
+    // ================================================================================================
+
+    checkColor(string) {
+        // mimicking DOM addition
+        const div = document.createElement("div");
+        div.style.color = string.trim().toLowerCase();
+        document.body.appendChild(div);
+        const color = window.getComputedStyle(div).color;
+        document.body.removeChild(div);
+
+        const rgbValues = color
+            .slice(4, -1)
+            .split(",")
+            .map((x) => +x.trim()); // just the rgb values (r,g,b)
+
+        if (rgbValues[0] < 40 && rgbValues[1] < 40 && rgbValues[2] < 40) return `rgb(0, 128, 0)`; // return green if it is too dark
+
+        return color;
+    }
+
+    // ================================================================================================
+
+    // get from LS
+    getAccentColor() {
+        const fetched = LS.get("timerAccentColor", "prim");
+        if (!fetched) return;
+        this.#state.accentColor = fetched;
+    }
+
+    // ================================================================================================
+
+    changeAccentColor(color) {
+        this.#state.accentColor = color;
+        LS.save(`timerAccentColor`, this.#state.accentColor, "prim"); // pushing to LS, primitive type
+    }
+
+    // ================================================================================================
+
+    returnAccentColor = () => this.#state.accentColor;
 
     // ================================================================================================
 }

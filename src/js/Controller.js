@@ -18,11 +18,17 @@ function init() {
     Visual.renderColorBtn();
     Visual.handleColorClick(changeAccentColor);
     runEventListeners();
+
+    // fetching quick options from LS/state
     const savedQuickOptions = Logic.getTimerQuickOptions();
     if (savedQuickOptions) {
         Visual.renderQuickOptions(savedQuickOptions);
         Visual.handleQuickOptions(quickOptionsHandler); // handle clicks on quick options
     }
+
+    // fetching accent color from LS/state
+    const accentColor = Logic.returnAccentColor();
+    if (accentColor) Visual.setAccentColor(accentColor);
 }
 init();
 
@@ -45,7 +51,9 @@ function changeAccentColor() {
     const answer = prompt("Type your new interface color:");
     if (answer === null) return;
     if (answer && answer.trim().length < 3) return;
-    console.log(`change the accent color to:`, answer);
+    const checkedColor = Logic.checkColor(answer);
+    Visual.setAccentColor(checkedColor);
+    Logic.changeAccentColor(checkedColor);
 }
 
 // ================================================================================================

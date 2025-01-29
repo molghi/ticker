@@ -9,6 +9,7 @@
     text-align: center;
     transition: all 0.3s;
     position: relative;
+    border-color: var(--accent);
 }
 
 .ticker-block {
@@ -81,6 +82,7 @@
     column-gap: 30px;
     margin-bottom: 60px;
     transition: all 0.3s;
+    color: var(--accent);
 }
 
 .ticker-element-command {
@@ -105,6 +107,7 @@
 }
 
 .ticker-element-options {
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -310,6 +310,14 @@ class View {
     }
 
     // ================================================================================================
+
+    // change the accent color of the interface
+    setAccentColor(color) {
+        if (!color) return;
+        document.documentElement.style.setProperty("--accent", color); // changing the accent colour
+    }
+
+    // ================================================================================================
 }
 
 export default View;

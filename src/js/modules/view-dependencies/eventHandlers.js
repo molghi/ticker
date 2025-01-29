@@ -3,7 +3,7 @@ import { Visual } from "../../Controller.js";
 // ================================================================================================
 
 // handle clicks on "Timer", "Stopwatch", or "Until"
-function handleTopControls() {
+function handleTopControls(handler) {
     Visual.appTopBtns.addEventListener("click", function (e) {
         if (!e.target.classList.contains("app__control-btn")) return;
         const btnClicked = e.target;
@@ -19,14 +19,17 @@ function handleTopControls() {
             Visual.show(Visual.timerBlock); // show timer, hide all the rest
             Visual.renderTicker("timer");
             Visual.toggleQuickOptions("show");
+            handler(btnClickedType);
         } else if (btnClickedType === "stopwatch") {
             Visual.show(Visual.stopwatchBlock); // show stopwatch, hide all the rest
             Visual.renderTicker("stopwatch", true); // true means render the seconds block too
             Visual.toggleQuickOptions("hide");
+            handler(btnClickedType);
         } else if (btnClickedType === "until") {
             Visual.show(Visual.tillBlock); // show until, hide all the rest
             Visual.renderTicker("until");
             Visual.toggleQuickOptions("hide");
+            handler(btnClickedType);
         }
     });
 }
@@ -49,6 +52,7 @@ function handleTickerBtns() {
 
 // dependency of 'handleTickerBtns'
 function handleTickerBtnsCallback(e) {
+    const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
     if (!e.target.classList.contains("ticker-block-btn") && !e.target.classList.contains("ticker-block-btn-save")) return;
     const clickedBtn = e.target;
     if (clickedBtn.classList.contains("ticker-block-btn-save")) {
@@ -63,11 +67,21 @@ function handleTickerBtnsCallback(e) {
         const clickedItem = clickedBtn.closest(".ticker-block"); // to determine if it is a btn of Hours or Minutes
         const clickedItemType = clickedItem.classList.contains("ticker-block--hours") ? "hours" : "minutes";
         const input = clickedBtn.parentElement.previousElementSibling.querySelector("input"); // if we clicked on the plus btn in Minutes, this input is the minutes input and vice versa
+
         const concatted = `${clickedBtnType} ${clickedItemType}`; // concatting to handle cases
         Visual.timerVisualLogic(input, concatted); // handling the cases
-        if (input.value !== "00")
-            Visual.toggleOptionSaveBtn("show"); // "save to quick options" only shows if the input value is not 0
-        else Visual.toggleOptionSaveBtn("hide");
+        if (input.value !== "00") {
+            // "save to quick options" only shows if the input value is not 0
+            Visual.toggleOptionSaveBtn("show");
+        } else {
+            Visual.toggleOptionSaveBtn("hide");
+        }
+
+        if (activeBlock === "until") {
+            // when in Until, hours cannot be more than 23
+            const hoursInput = document.querySelector(".ticker-block--hours input");
+            if (+hoursInput.value > 23) document.querySelector(".ticker-block--hours input").value = `00`;
+        }
     }
 }
 
@@ -83,6 +97,7 @@ function handleTickerInput() {
 
 // dependency of 'handleTickerInput'
 function handleTickerInputCallback(e) {
+    const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
     const acceptedValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", undefined];
     // if input was just one char, inputValue[1] returns undefined, that's why undef is in acceptedValues
     const inputValue = e.target.value;
@@ -95,6 +110,12 @@ function handleTickerInputCallback(e) {
     // making sure it doesn't contain any unaccepted characters
     if (!acceptedValues.includes(inputValue[0])) e.target.value = replaceValue + e.target.value.slice(1, 2);
     if (!acceptedValues.includes(inputValue[1])) e.target.value = e.target.value.slice(0, 1) + replaceValue;
+
+    if (activeBlock === "until") {
+        // when in Until, hours cannot be more than 23
+        const hoursInput = document.querySelector(".ticker-block--hours input");
+        if (+hoursInput.value > 23) document.querySelector(".ticker-block--hours input").value = `00`;
+    }
 }
 
 // ================================================================================================

@@ -120,4 +120,14 @@ function renderColorBtn() {
 
 // ================================================================================================
 
-export { renderTicker, renderQuickOptions, renderColorBtn };
+function renderCurrentTime(hours, minutes) {
+    if (document.querySelector(".current-time")) document.querySelector(".current-time").remove();
+    const span = document.createElement("span");
+    span.classList.add("current-time");
+    span.innerHTML = `Now: ${hours}<span>:</span>${minutes.toString().padStart(2, 0)}`;
+    Visual.appTopBtns.appendChild(span);
+}
+
+// ================================================================================================
+
+export { renderTicker, renderQuickOptions, renderColorBtn, renderCurrentTime };

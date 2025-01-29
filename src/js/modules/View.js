@@ -1,7 +1,7 @@
 // View is responsible for everything that happens on the screen: rendering and all visual interactions with any elements
 
 import KeyCommands from "./view-dependencies/keyCommands.js";
-import { renderTicker, renderQuickOptions, renderColorBtn } from "./view-dependencies/renderMethods.js";
+import { renderTicker, renderQuickOptions, renderColorBtn, renderCurrentTime } from "./view-dependencies/renderMethods.js";
 import {
     handleTopControls,
     handleColorClick,
@@ -46,8 +46,14 @@ class View {
 
     // ================================================================================================
 
-    handleTopControls() {
-        handleTopControls();
+    renderCurrentTime(hrs, min) {
+        renderCurrentTime(hrs, min);
+    }
+
+    // ================================================================================================
+
+    handleTopControls(handler) {
+        handleTopControls(handler);
     }
 
     // ================================================================================================
@@ -317,6 +323,21 @@ class View {
         document.documentElement.style.setProperty("--accent", color); // changing the accent colour
     }
 
+    // ================================================================================================
+
+    // finding what block is active now: timer, stopwatch or until
+    defineActiveBlock() {
+        return [...document.querySelectorAll(".app__controls button")]
+            .find((el) => el.classList.contains("active"))
+            .textContent.toLowerCase()
+            .trim();
+    }
+
+    // ================================================================================================
+
+    removeCurrentTime() {
+        if (document.querySelector(".current-time")) document.querySelector(".current-time").remove();
+    }
     // ================================================================================================
 }
 

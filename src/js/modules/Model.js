@@ -5,12 +5,16 @@ import LS from "./model-dependencies/localStorage.js";
 class Model {
     #state = {
         runningTimer: "",
+        currentTimeTimer: "",
         timer: {
             currentValues: [],
             quickOptions: [],
         },
         stopwatch: {
             currentValues: [0, 0, 0],
+        },
+        until: {
+            setTime: [],
         },
         accentColor: "",
     };
@@ -38,6 +42,12 @@ class Model {
     resetTimerValues = () => (this.#state.timer.currentValues = []);
 
     getTimerQuickOptions = () => this.#state.timer.quickOptions;
+
+    setUntilTime = (value) => (this.#state.until.setTime = value);
+    getUntilTime = () => this.#state.until.setTime;
+
+    setUntilPauseTime = (value) => (this.#state.until.pausedTime = value);
+    getUntilPauseTime = () => this.#state.until.pausedTime;
 
     // ================================================================================================
 
@@ -89,16 +99,35 @@ class Model {
 
     // ================================================================================================
 
+    resumeInterval(handler) {
+        clearInterval(this.#state.runningTimer); // clearing first before setting
+
+        handler(this.#state.until.setTime);
+        this.#state.runningTimer = setInterval(() => {
+            const [hours, minutes, seconds] = this.timerLogic(); // decreasing values (hours, minutes, seconds) happens here
+            handler([hours, minutes, seconds], "timer");
+        }, 1000); // every second
+    }
+
+    // ================================================================================================
+
     stopTimer() {
         clearInterval(this.#state.runningTimer);
     }
 
     // ================================================================================================
 
-    timerLogic() {
-        let hours = this.#state.timer.currentValues[0];
-        let minutes = this.#state.timer.currentValues[1];
-        let seconds = this.#state.timer.currentValues[2];
+    timerLogic(type) {
+        let hours, minutes, seconds;
+        if (type === "until") {
+            hours = this.#state.until.setTime[0];
+            minutes = this.#state.until.setTime[1];
+            seconds = 0;
+        } else {
+            hours = this.#state.timer.currentValues[0];
+            minutes = this.#state.timer.currentValues[1];
+            seconds = this.#state.timer.currentValues[2];
+        }
 
         seconds -= 1;
         if (seconds < 0 && minutes > 0 && hours >= 0) {
@@ -193,6 +222,57 @@ class Model {
     // ================================================================================================
 
     returnAccentColor = () => this.#state.accentColor;
+
+    // ================================================================================================
+
+    getNowTime() {
+        const now = new Date();
+        const nowYear = now.getFullYear();
+        const nowMonth = now.getMonth() + 1;
+        const nowDate = now.getDate();
+        const nowHours = now.getHours();
+        const nowMinutes = now.getMinutes();
+        return [nowYear, nowMonth, nowDate, nowHours, nowMinutes, now];
+    }
+
+    // ================================================================================================
+
+    calcTimeDifference(arr) {
+        console.log(arr);
+        // 'arr' here is the array of strings which are the values that were in inputs in Until
+        const [setHours, setMinutes] = arr;
+        let [nowYear, nowMonth, nowDate, nowHours, nowMinutes, now] = this.getNowTime();
+        const nowTime = now.getTime();
+        if (+setMinutes === nowMinutes && +setHours === nowHours) return [24, 0];
+        if (+setMinutes === nowMinutes + 1 && +setHours === nowHours) return [0, 1];
+
+        let whichDay;
+        if (+setHours < nowHours) whichDay = "next";
+        else if (+setHours === nowHours && +setMinutes < nowMinutes) whichDay = "next";
+        else whichDay = "this";
+
+        whichDay === "next" && nowDate++; // if it is the next day, increment the now day value
+
+        let thenTime = `${nowYear}-${nowMonth.toString().padStart(2, 0)}-${nowDate}T${setHours}:${setMinutes}`; // 2025-01-27T14:30
+        thenTime = new Date(thenTime).getTime();
+
+        const difference = thenTime - nowTime;
+        const seconds = Math.floor(difference / 1000);
+        const minutes = Math.floor((seconds / 60) % 60);
+        const hours = Math.floor(seconds / 3600);
+
+        return [hours, minutes];
+    }
+
+    // ================================================================================================
+
+    everyMinTimer(handler) {
+        clearInterval(this.#state.currentTimeTimer); // clearing first before setting
+
+        this.#state.currentTimeTimer = setInterval(() => {
+            handler();
+        }, 60000);
+    }
 
     // ================================================================================================
 }

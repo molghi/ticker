@@ -3,13 +3,15 @@
 // NOTE: because I import with 'use' and not 'import' (which is deprecated), I must use this syntax now: @media (max-width: #{initial.$md3}px) { ... }
 
 .app {
+    text-align: center;
     &__controls {
         // btns styles
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 100px;
         transition: opacity 0.3s;
+        position: relative;
     }
 
     &__control-btn {
@@ -45,6 +47,11 @@
     }
 
     &__till {
+        .ticker-element {
+            .ticker-block-btn-save {
+                display: none;
+            }
+        }
     }
 
     &__bottom-controls {
@@ -101,4 +108,29 @@
 
 .hidden {
     display: none !important;
+}
+
+.current-time {
+    position: absolute;
+    bottom: -30px;
+    right: 0;
+    color: var(--accent);
+    font-size: 14px;
+    opacity: 0.75;
+    &:hover {
+        opacity: 1;
+    }
+    span {
+        animation: blinkTime 2s steps(1, start) infinite;
+    }
+}
+
+@keyframes blinkTime {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }

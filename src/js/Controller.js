@@ -36,12 +36,24 @@ init();
 
 // running event listeners
 function runEventListeners() {
-    Visual.handleTopControls(); // handle clicks on "Timer", "Stopwatch", or "Until"
+    Visual.handleTopControls(topControlsHandler); // handle clicks on "Timer", "Stopwatch", or "Until"
     Visual.handleStartClick(startCountHandler); // listening to my custom event 'clockstarts' that happens when I click start to start a countdown
     Visual.handleStopClick(stopCountHandler); // listening to my custom event 'clockstops' that happens when I click stop to stop a countdown
     Visual.handlePauseClick(pauseCountHandler); // listening to my custom event 'clockpauses' that happens when I click pause to pause a countdown
     Visual.handleResumeClick(resumeCountHandler); // listening to my custom event 'clockresumes' that happens when I click resume to resume a countdown
     Visual.handleAddingOption(addQuickOption); // listening to my custom event 'addoption' that happens when I click 'Save to Quick Options'
+}
+
+// ================================================================================================
+
+function topControlsHandler(btnClickedType) {
+    if (btnClickedType !== "until") return Visual.removeCurrentTime();
+    const [nowYear, nowMonth, nowDate, nowHours, nowMinutes, now] = Logic.getNowTime();
+    Visual.renderCurrentTime(nowHours, nowMinutes);
+    Logic.everyMinTimer(() => {
+        const [nowYear, nowMonth, nowDate, nowHours, nowMinutes, now] = Logic.getNowTime();
+        Visual.renderCurrentTime(nowHours, nowMinutes);
+    });
 }
 
 // ================================================================================================
@@ -61,24 +73,35 @@ function changeAccentColor() {
 // happens when I click start to start a countdown
 function startCountHandler(inputValuesArr) {
     const asNumbers = inputValuesArr.map((el) => +el); // transforming into numbers
-    const activeBlock = [...document.querySelectorAll(".app__controls button")]
-        .find((el) => el.classList.contains("active"))
-        .textContent.toLowerCase(); // finding what block is active now: timer, stopwatch or until
+    const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
 
     if (activeBlock === "timer" && asNumbers.reduce((a, b) => a + b, 0) === 0) {
         return alert("You cannot start a timer for 0 hours 0 minutes"); // showing a message if I'm starting a countdown with all zeroes as values
     } else if (activeBlock === "timer") {
+        console.log(asNumbers);
         Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
         Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
-        Visual.changeStartBtnText("pause");
-        Visual.toggleOptionSaveBtn("hide");
+        Visual.changeStartBtnText("pause"); // changing the text of the Start btn
+        Visual.toggleOptionSaveBtn("hide"); // hiding the Save This Option btn
     } else if (activeBlock === "stopwatch") {
-        Logic.resetStopwatchValues();
-        Logic.startIntervalStopwatch(Visual.showTicking);
-        Visual.changeStartBtnText("pause");
+        Logic.resetStopwatchValues(); // resetting values to all zeroes
+        Logic.startIntervalStopwatch(Visual.showTicking); // start ticking
+        Visual.changeStartBtnText("pause"); // changing the text of the Start btn
+    } else if (activeBlock === "until") {
+        console.log(`start Until`);
+        const values = Visual.readValues().slice(0, 2); // getting the current input values; slicing because it returns the seconds value too which is of no need here
+        const [hours, minutes] = Logic.calcTimeDifference(values);
+        Logic.setUntilTime(values);
+        // starting a usual timer below:
+        Logic.setTimerCurrentValues([hours, minutes, 0]); // setting timer values in state
+        Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
+        Visual.changeStartBtnText("pause"); // changing the text of the Start btn
+        Visual.toggleOptionSaveBtn("hide"); // hiding the Save This Option btn
+        Visual.removeCurrentTime();
     }
 }
 
+// remove it: just a test
 function logger([h, m, s]) {
     console.log(h, m, s);
 }
@@ -87,9 +110,7 @@ function logger([h, m, s]) {
 
 // happens when I click stop to stop a countdown
 function stopCountHandler() {
-    const activeBlock = [...document.querySelectorAll(".app__controls button")]
-        .find((el) => el.classList.contains("active"))
-        .textContent.toLowerCase(); // finding what block is active now: timer, stopwatch or until
+    const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
 
     Logic.stopTimer(); // stopping all interval timers
     document.querySelector(".ticker-element").classList.remove("working"); // decrease the size of the ticker element
@@ -103,6 +124,8 @@ function stopCountHandler() {
 
     if (activeBlock === "stopwatch") {
         Visual.toggleSecondsBlock("show");
+    } else if (activeBlock === "until") {
+        topControlsHandler("until"); // rendering the current time under the Until btn
     }
 }
 
@@ -110,6 +133,11 @@ function stopCountHandler() {
 
 // happens when I click pause to pause a countdown
 function pauseCountHandler(inputValuesArr) {
+    const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
+    if (activeBlock == "until") {
+        Logic.setUntilPauseTime(new Date().toISOString());
+    }
+
     Logic.stopTimer(); // stopping all interval timers
     Visual.updateTitle(undefined, "pause"); // put the pause sign in the title
     document.querySelector(".ticker-element").classList.add("paused"); // the ticker element is now slowly blinking
@@ -120,9 +148,7 @@ function pauseCountHandler(inputValuesArr) {
 // happens when I click resume to resume a countdown
 function resumeCountHandler(inputValuesArr) {
     const asNumbers = inputValuesArr.map((el) => +el);
-    const activeBlock = [...document.querySelectorAll(".app__controls button")]
-        .find((el) => el.classList.contains("active"))
-        .textContent.toLowerCase(); // finding what block is active now: timer, stopwatch or until
+    const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
 
     document.querySelector(".ticker-element").classList.remove("paused"); // removing the blinking class
 
@@ -130,10 +156,22 @@ function resumeCountHandler(inputValuesArr) {
         Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
         Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
     } else if (activeBlock === "stopwatch") {
-        console.log(`resume stopwatch`);
-        console.log(Logic.getState().stopwatch);
-        console.log(asNumbers);
-        Logic.startIntervalStopwatch(Visual.showTicking);
+        Logic.startIntervalStopwatch(Visual.showTicking); // resuming
+    } else if (activeBlock == "until") {
+        console.log(`resume until`);
+        console.log(Logic.getState());
+
+        const pauseTimeMinute = new Date(Logic.getUntilPauseTime()).getMinutes();
+        const nowMinute = new Date().getMinutes();
+
+        if (pauseTimeMinute !== nowMinute) {
+            const [hours, minutes] = Logic.calcTimeDifference(Logic.getUntilTime());
+            Logic.setTimerCurrentValues([hours, minutes, 0]); // setting timer values in state
+        }
+
+        Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
+        Visual.changeStartBtnText("pause"); // changing the text of the Start btn
+        Visual.toggleOptionSaveBtn("hide"); // hiding the Save This Option btn
     }
 }
 

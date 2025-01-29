@@ -1,23 +1,63 @@
 // Model is responsible for all logic in the app: all computations, calculations, and data operations
 
+import LS from "./model-dependencies/localStorage.js";
+
 class Model {
     #state = {
         runningTimer: "",
         timer: {
             currentValues: [],
+            quickOptions: [],
         },
     };
 
-    constructor() {}
+    constructor() {
+        this.getQuickOptions(); // from LS
+        console.log(`state:`, this.#state);
+    }
 
     // ================================================================================================
 
     getTimerCurrentValues = () => this.#state.timer.currentValues;
 
     // setTimerCurrentValues = (arr) => this.#state.timer.currentValues.push(...arr, 0); // 0 here for seconds
-    setTimerCurrentValues = (arr) => this.#state.timer.currentValues.push(...arr);
+    setTimerCurrentValues = (arr) => {
+        this.resetTimerValues();
+        this.#state.timer.currentValues.push(...arr);
+    };
 
     resetTimerValues = () => (this.#state.timer.currentValues = []);
+
+    getTimerQuickOptions = () => this.#state.timer.quickOptions;
+
+    // ================================================================================================
+
+    addQuickOption(arr) {
+        const asNumbers = arr.map((x) => +x);
+        const secondsRemoved = asNumbers.slice(0, 2);
+        const allSavedOptionsStringified = this.#state.timer.quickOptions.map((x) => x.toString());
+        if (allSavedOptionsStringified.includes(secondsRemoved.toString())) return; // if what we are adding is already there, return
+        this.#state.timer.quickOptions.push(secondsRemoved);
+        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, reference type
+    }
+
+    // ================================================================================================
+
+    removeQuickOption(value) {
+        const allSavedOptionsStringified = this.#state.timer.quickOptions.map((x) => x.toString()); // to find it easily
+        const index = allSavedOptionsStringified.findIndex((el) => el === value); // getting the index of this option
+        if (index < 0) return;
+        this.#state.timer.quickOptions.splice(index, 1); // removing this option
+        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, reference type
+    }
+
+    // ================================================================================================
+
+    getQuickOptions() {
+        const fetched = LS.get(`quickOptions`, "ref");
+        if (!fetched) return;
+        fetched.forEach((arr) => this.#state.timer.quickOptions.push(arr));
+    }
 
     // ================================================================================================
 

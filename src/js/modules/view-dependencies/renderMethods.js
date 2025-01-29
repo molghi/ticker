@@ -27,9 +27,8 @@ function renderTicker(renderWhere, secondsFlag = false) {
     // const elements = secondsFlag ? ["Hours", "Minutes", "Seconds"] : ["Hours", "Minutes"]; // if secondsFlag is true, render seconds block too
     const elements = ["Hours", "Minutes", "Seconds"];
 
-    const html = elements
-        .map((elName) => {
-            return `<div class="ticker-block ticker-block--${elName.toLowerCase()}">
+    let html = elements.map((elName) => {
+        return `<div class="ticker-block ticker-block--${elName.toLowerCase()}">
         <div class="ticker-block-label">${elName}</div>
         <div class="ticker-block-input">
             <input type="text" min="0" value="00" maxlength="2">
@@ -39,10 +38,11 @@ function renderTicker(renderWhere, secondsFlag = false) {
             <button class="ticker-block-btn ticker-block-btn--increase">+</button>
         </div>
         </div>`;
-        })
-        .join("");
+    });
 
-    div.innerHTML = html;
+    html.push(`<button class="ticker-block-btn-save hidden">Save to Quick Options</button>`); // pushing the btn last
+
+    div.innerHTML = html.join("");
 
     if (renderWhere === "timer") Visual.timerBlock.appendChild(div);
     else if (renderWhere === "stopwatch") Visual.stopwatchBlock.appendChild(div);
@@ -52,7 +52,7 @@ function renderTicker(renderWhere, secondsFlag = false) {
 
     renderStartStopBtns(); // rendering start stop btns
 
-    renderQuickOptions([`3m 30s`, `1h`]);
+    // renderQuickOptions([]);
 }
 
 // ================================================================================================
@@ -90,8 +90,12 @@ function renderQuickOptions(optionsArr) {
 
     const html = optionsArr
         .map((option, i) => {
-            if (i === 0) return `<span>Quick Options:</span><button class="ticker-element-option">${option}</button>`;
-            return `<button class="ticker-element-option">${option}</button>`;
+            let content = "";
+            if (option[0] !== 0) content = `${option[0]}h`;
+            if (option[1] !== 0) content += ` ${option[1]}m`;
+            if (i === 0)
+                return `<span class="ticker-element-options-title">Quick Options:</span><button data-time="${option}" class="ticker-element-option"><span class="ticker-element-option-title">Remove</span>${content}</button>`;
+            return `<button data-time="${option}" class="ticker-element-option"><span class="ticker-element-option-title">Remove</span>${content}</button>`;
         })
         .join("");
 

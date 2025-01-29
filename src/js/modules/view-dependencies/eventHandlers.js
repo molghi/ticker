@@ -42,21 +42,33 @@ function handleColorClick(handler) {
 
 // ================================================================================================
 
-// handle plus and minus btns of Hours or Minutes
+// handle plus and minus btns of Hours or Minutes -- or save to quick options btn
 function handleTickerBtns() {
     document.querySelector(".ticker-element").addEventListener("click", handleTickerBtnsCallback); // I remove it in renderMethods.js
 }
 
 // dependency of 'handleTickerBtns'
 function handleTickerBtnsCallback(e) {
-    if (!e.target.classList.contains("ticker-block-btn")) return;
+    if (!e.target.classList.contains("ticker-block-btn") && !e.target.classList.contains("ticker-block-btn-save")) return;
     const clickedBtn = e.target;
-    const clickedBtnType = clickedBtn.textContent.trim() === `+` ? "increase" : "decrease"; // determining clicked btn type
-    const clickedItem = clickedBtn.closest(".ticker-block"); // to determine if it is a btn of Hours or Minutes
-    const clickedItemType = clickedItem.classList.contains("ticker-block--hours") ? "hours" : "minutes";
-    const input = clickedBtn.parentElement.previousElementSibling.querySelector("input"); // if we clicked on the plus btn in Minutes, this input is the minutes input and vice versa
-    const concatted = `${clickedBtnType} ${clickedItemType}`; // concatting to handle cases
-    Visual.timerVisualLogic(input, concatted); // handling the cases
+    if (clickedBtn.classList.contains("ticker-block-btn-save")) {
+        // it was a click on "save to quick options"
+        const values = Visual.readValues(); // reading the input values
+        // Emitting a custom event
+        const customEvent = new CustomEvent("addoption", { detail: { inputValues: values } });
+        document.dispatchEvent(customEvent);
+    } else {
+        // it was a click on plus and minus UI btns of Hours or Minutes
+        const clickedBtnType = clickedBtn.textContent.trim() === `+` ? "increase" : "decrease"; // determining clicked btn type
+        const clickedItem = clickedBtn.closest(".ticker-block"); // to determine if it is a btn of Hours or Minutes
+        const clickedItemType = clickedItem.classList.contains("ticker-block--hours") ? "hours" : "minutes";
+        const input = clickedBtn.parentElement.previousElementSibling.querySelector("input"); // if we clicked on the plus btn in Minutes, this input is the minutes input and vice versa
+        const concatted = `${clickedBtnType} ${clickedItemType}`; // concatting to handle cases
+        Visual.timerVisualLogic(input, concatted); // handling the cases
+        if (input.value !== "00")
+            Visual.toggleOptionSaveBtn("show"); // "save to quick options" only shows if the input value is not 0
+        else Visual.toggleOptionSaveBtn("hide");
+    }
 }
 
 // ================================================================================================
@@ -74,6 +86,11 @@ function handleTickerInputCallback(e) {
     const acceptedValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", undefined];
     // if input was just one char, inputValue[1] returns undefined, that's why undef is in acceptedValues
     const inputValue = e.target.value;
+    if (inputValue !== "00" && inputValue !== "0") Visual.toggleOptionSaveBtn("show");
+    else Visual.toggleOptionSaveBtn("hide");
+
+    const inputType = e.target.closest(".ticker-block").classList.contains("ticker-block--minutes") ? "minutes" : "hours"; // determining if it's an input of Hours or Minutes
+    if (inputType === "minutes" && +inputValue > 59) e.target.value = "00"; // minutes cannot be more than 59
     const replaceValue = "0";
     // making sure it doesn't contain any unaccepted characters
     if (!acceptedValues.includes(inputValue[0])) e.target.value = replaceValue + e.target.value.slice(1, 2);
@@ -91,12 +108,28 @@ function handleStartStop() {
 function handleStartStopCallback(e) {
     if (!e.target.classList.contains("ticker-element-command")) return;
     const clickedBtn = e.target;
-    const clickedBtnType = clickedBtn.textContent.trim().toLowerCase() === `start` ? "start" : "stop"; // determining clicked btn type
+    let clickedBtnType; // determining clicked btn type below
+    if (clickedBtn.textContent.trim().toLowerCase() === `start`) clickedBtnType = "start";
+    else if (clickedBtn.textContent.trim().toLowerCase() === `stop`) clickedBtnType = "stop";
+    else if (clickedBtn.textContent.trim().toLowerCase() === `pause`) clickedBtnType = "pause";
+    else if (clickedBtn.textContent.trim().toLowerCase() === `resume`) clickedBtnType = "resume";
+
+    const valuesArr = Visual.readValues(); // the values of inputs
+
     if (clickedBtnType === "start") {
-        const valuesArr = Visual.readValues();
         // Emitting a custom event
         const customEvent = new CustomEvent("clockstarts", { detail: { inputValues: valuesArr } });
         document.dispatchEvent(customEvent);
+    } else if (clickedBtnType === "pause") {
+        // Emitting a custom event
+        const customEvent = new CustomEvent("clockpauses", { detail: { inputValues: valuesArr } });
+        document.dispatchEvent(customEvent);
+        Visual.changeStartBtnText("resume");
+    } else if (clickedBtnType === "resume") {
+        // Emitting a custom event
+        const customEvent = new CustomEvent("clockresumes", { detail: { inputValues: valuesArr } });
+        document.dispatchEvent(customEvent);
+        Visual.changeStartBtnText("pause");
     } else {
         const customEvent = new CustomEvent("clockstops");
         document.dispatchEvent(customEvent);
@@ -119,17 +152,44 @@ function handleStopClick(handler) {
     });
 }
 
+// listening to my custom event 'clockpauses' that happens when I click pause to pause a countdown
+function handlePauseClick(handler) {
+    document.addEventListener("clockpauses", function (e) {
+        handler(e.detail.inputValues);
+    });
+}
+
+// listening to my custom event 'clockresumes' that happens when I click resume to resume a countdown
+function handleResumeClick(handler) {
+    document.addEventListener("clockresumes", function (e) {
+        handler(e.detail.inputValues);
+    });
+}
+
+// listening to my custom event 'addoption' that happens when I click 'Save to Quick Options'
+function handleAddingOption(handler) {
+    document.addEventListener("addoption", function (e) {
+        handler(e.detail.inputValues);
+    });
+}
+
 // ================================================================================================
 
 // handle clicks on quick options
-function handleQuickOptions() {
+function handleQuickOptions(handler) {
+    Visual.quickOptionsHandler = handler;
     document.querySelector(".ticker-element-options").addEventListener("click", handleQuickOptionsCallback); // I remove it in renderMethods.js
 }
 
 function handleQuickOptionsCallback(e) {
-    if (!e.target.classList.contains("ticker-element-option")) return;
-    const clickedBtn = e.target;
-    console.log(clickedBtn);
+    if (!e.target.classList.contains("ticker-element-option") && !e.target.classList.contains("ticker-element-option-title"))
+        return;
+    const clickedBtn = e.target.closest("button");
+    const clickedTag = e.target.tagName;
+    let actionName;
+    if (clickedTag === "BUTTON") actionName = "start";
+    if (clickedTag === "SPAN") actionName = "remove";
+    Visual.quickOptionsHandler(actionName, clickedBtn);
 }
 
 // ================================================================================================
@@ -147,4 +207,7 @@ export {
     handleTickerInputCallback,
     handleStartClick,
     handleStopClick,
+    handlePauseClick,
+    handleResumeClick,
+    handleAddingOption,
 };

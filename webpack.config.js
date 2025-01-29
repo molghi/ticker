@@ -27,6 +27,13 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.mp3$/,
+                type: "asset/resource",
+                generator: {
+                    filename: "assets/[name][ext]",
+                },
+            },
+            {
                 test: /\.ico$/i,
                 type: "asset/resource",
             },

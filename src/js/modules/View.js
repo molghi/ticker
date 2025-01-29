@@ -11,7 +11,12 @@ import {
     handleTickerInput,
     handleStartClick,
     handleStopClick,
+    handlePauseClick,
+    handleResumeClick,
+    handleAddingOption,
 } from "./view-dependencies/eventHandlers.js";
+
+import countdownFinished from "../../sounds/countdown-finished.mp3";
 
 // ================================================================================================
 
@@ -35,7 +40,7 @@ class View {
         renderTicker(renderWhere, secondsFlag);
         this.handleTickerBtns();
         this.handleStartStop();
-        this.handleQuickOptions();
+        // this.handleQuickOptions();
         this.handleTickerInput();
     }
 
@@ -91,8 +96,8 @@ class View {
 
     // ================================================================================================
 
-    handleQuickOptions() {
-        handleQuickOptions();
+    handleQuickOptions(handler) {
+        handleQuickOptions(handler);
     }
 
     // ================================================================================================
@@ -163,6 +168,47 @@ class View {
 
     // ================================================================================================
 
+    handlePauseClick(handler) {
+        handlePauseClick(handler);
+    }
+
+    // ================================================================================================
+
+    handleResumeClick(handler) {
+        handleResumeClick(handler);
+    }
+
+    // ================================================================================================
+
+    renderQuickOptions(arr) {
+        renderQuickOptions(arr);
+        this.handleQuickOptions();
+    }
+
+    // ================================================================================================
+
+    handleAddingOption(handler) {
+        handleAddingOption(handler);
+    }
+
+    // ================================================================================================
+
+    playSound() {
+        const audio = new Audio(countdownFinished);
+        audio.volume = 0.25;
+
+        let playCount = 0;
+        audio.play();
+
+        audio.onended = () => {
+            // using an event listener to replay the audio 3 times
+            playCount++;
+            if (playCount < 3) audio.play();
+        };
+    }
+
+    // ================================================================================================
+
     showTicking = (arr) => {
         const allInputs = [...document.querySelectorAll(".ticker-element input")];
         document.querySelector(".ticker-block--seconds").classList.remove("hidden"); // unhiding the seconds block
@@ -171,7 +217,22 @@ class View {
         this.toggleInterfaceDimmer("dimmer");
         this.updateTitle(arr);
 
-        if (arr.join("") === "000") console.log(`timer finished: show some msg`);
+        if (arr.join("") === "000") {
+            this.playSound();
+            console.log(
+                `The countdown has finished at ${new Date().getHours()}:${new Date().getMinutes().toString().padStart(2, 0)}`
+            );
+            setTimeout(() => {
+                // restoring the interface
+                document.querySelector(".ticker-element").classList.remove("working"); // decrease the size of the ticker element
+                document.querySelector(".ticker-element").classList.remove("paused"); // removing the blinking class
+                this.toggleInterfaceDimmer("show"); // bring back the interface
+                this.resetInputValues(); // reset in the UI
+                this.toggleSecondsBlock("hide"); // hiding the seconds block
+                this.updateTitle(undefined, "restore"); // put 'Ticker' back in the title
+                this.changeStartBtnText("start"); // changing the text of Start btn
+            }, 15000);
+        }
     };
 
     // ================================================================================================
@@ -210,12 +271,42 @@ class View {
 
     // ================================================================================================
 
-    updateTitle(arr, restoreFlag) {
+    updateTitle(arr, flag) {
+        if (flag === "restore") return (document.title = "Ticker");
+
+        if (flag === "pause") return (document.title = document.title + " ⏸");
+
+        if (flag === "resume") return (document.title = document.title.replace(" ⏸", ""));
+
         if (arr) {
             const [hr, min, sec] = arr;
-            document.title = `${hr.toString().padStart(2, 0)}:${min.toString().padStart(2, 0)}:${sec.toString().padStart(2, 0)}`;
+            const padIt = (value) => value.toString().padStart(2, "0"); // little helper fn
+            document.title = `${padIt(hr)}:${padIt(min)}:${padIt(sec)}`;
         }
-        if (restoreFlag) document.title = "Ticker";
+    }
+
+    // ================================================================================================
+
+    changeStartBtnText(changeTo) {
+        const startBtn = document.querySelector(".ticker-element-command--start");
+        if (changeTo === "pause") {
+            startBtn.textContent = "Pause";
+        } else if (changeTo === "resume") {
+            startBtn.textContent = "Resume";
+        } else {
+            startBtn.textContent = "Start";
+        }
+    }
+
+    // ================================================================================================
+
+    toggleOptionSaveBtn(flag) {
+        const btn = document.querySelector(".ticker-block-btn-save");
+        if (flag === "show") {
+            btn.classList.remove("hidden");
+        } else {
+            btn.classList.add("hidden");
+        }
     }
 
     // ================================================================================================

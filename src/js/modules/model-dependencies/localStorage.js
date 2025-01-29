@@ -30,7 +30,9 @@ class LS {
         if (type.startsWith("prim")) {
             return localStorage.getItem(key); // primitives need no JSON-parsing
         } else {
-            return localStorage.getItem(JSON.parse(key)); // ref types do
+            const fetched = localStorage.getItem(key);
+            if (!fetched) return null;
+            return JSON.parse(fetched); // ref types do
         }
     }
 

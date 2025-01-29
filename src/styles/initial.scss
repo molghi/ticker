@@ -134,6 +134,12 @@ h1 {
 
 // ================================================================================================
 
+audio {
+    display: none;
+}
+
+// ================================================================================================
+
 // disabling the up/down arrows on a number input
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {

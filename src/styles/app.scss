@@ -60,6 +60,29 @@
         left: 50%;
         transform: translateX(-50%);
     }
+
+    &__history {
+        color: var(--accent);
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        text-align: right;
+        opacity: 0.3;
+        transition: opacity 0.2s;
+        &:hover {
+            opacity: 1;
+        }
+        &-title {
+            margin-bottom: 5px;
+            text-shadow: 0 0 1px var(--accent);
+        }
+        &-box {
+            font-size: 13px;
+            span {
+                font-size: 14px;
+            }
+        }
+    }
 }
 
 // ================================================================================================

@@ -9,6 +9,7 @@ class Model {
         timer: {
             currentValues: [],
             quickOptions: [],
+            setTime: [],
         },
         stopwatch: {
             currentValues: [0, 0, 0],
@@ -17,6 +18,7 @@ class Model {
             setTime: [],
         },
         accentColor: "",
+        timerIsRunning: false,
     };
 
     constructor() {
@@ -48,6 +50,18 @@ class Model {
 
     setUntilPauseTime = (value) => (this.#state.until.pausedTime = value);
     getUntilPauseTime = () => this.#state.until.pausedTime;
+
+    pushTimerSetTime = (value) => (this.#state.timer.setTime = value);
+    getTimerSetTime = () => {
+        const raw = this.#state.timer.setTime;
+        let result = "";
+        if (raw[0] !== 0) result = `${raw[0]}h`;
+        if (raw[1] !== 0) result += ` ${raw[1]}m`;
+        return result.trim();
+    };
+
+    setTimerIsRunning = () => (this.#state.timerIsRunning = !this.#state.timerIsRunning);
+    getTimerIsRunning = () => this.#state.timerIsRunning;
 
     // ================================================================================================
 

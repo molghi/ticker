@@ -46,6 +46,7 @@ function runEventListeners() {
 
 // ================================================================================================
 
+// handle clicks on "Timer", "Stopwatch", or "Until"
 function topControlsHandler(btnClickedType) {
     if (btnClickedType !== "until") return Visual.removeCurrentTime();
     const [nowYear, nowMonth, nowDate, nowHours, nowMinutes, now] = Logic.getNowTime();
@@ -78,17 +79,21 @@ function startCountHandler(inputValuesArr) {
     if (activeBlock === "timer" && asNumbers.reduce((a, b) => a + b, 0) === 0) {
         return alert("You cannot start a timer for 0 hours 0 minutes"); // showing a message if I'm starting a countdown with all zeroes as values
     } else if (activeBlock === "timer") {
-        console.log(asNumbers);
         Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
         Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
         Visual.changeStartBtnText("pause"); // changing the text of the Start btn
         Visual.toggleOptionSaveBtn("hide"); // hiding the Save This Option btn
+        Logic.pushTimerSetTime(asNumbers); // pushing the set time to show the History string
+        const setTime = Logic.getTimerSetTime(); // getting the string of the set time
+        const historyString = `Timer for <span>${setTime}</span> is running`; // composing the text for history-box
+        Visual.updateHistoryBox(historyString); // updating history box
     } else if (activeBlock === "stopwatch") {
         Logic.resetStopwatchValues(); // resetting values to all zeroes
         Logic.startIntervalStopwatch(Visual.showTicking); // start ticking
         Visual.changeStartBtnText("pause"); // changing the text of the Start btn
+        const historyString = "Stopwatch is running";
+        Visual.updateHistoryBox(historyString); // updating history box
     } else if (activeBlock === "until") {
-        console.log(`start Until`);
         const values = Visual.readValues().slice(0, 2); // getting the current input values; slicing because it returns the seconds value too which is of no need here
         const [hours, minutes] = Logic.calcTimeDifference(values);
         Logic.setUntilTime(values);
@@ -98,7 +103,12 @@ function startCountHandler(inputValuesArr) {
         Visual.changeStartBtnText("pause"); // changing the text of the Start btn
         Visual.toggleOptionSaveBtn("hide"); // hiding the Save This Option btn
         Visual.removeCurrentTime();
+        const setTime = Logic.getUntilTime().map((x) => +x);
+        const historyString = `Counting to <span>${setTime[0]}:${setTime[1].toString().padStart(2, 0)}</span>`; // getting the string of the set time
+        Visual.updateHistoryBox(historyString); // updating history box
     }
+
+    Logic.setTimerIsRunning(); // setting that a timer is running, switching false to true
 }
 
 // remove it: just a test
@@ -110,7 +120,12 @@ function logger([h, m, s]) {
 
 // happens when I click stop to stop a countdown
 function stopCountHandler() {
+    if (!Logic.getTimerIsRunning()) return; // if no timer is running, early return
+
     const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
+    const values = Visual.readValues().map((x) => +x);
+    const units = ["h", "m", "s"];
+    let historyString = values.map((x, i) => `${x}${units[i]}`).join(" "); // getting the string to put in the history box
 
     Logic.stopTimer(); // stopping all interval timers
     document.querySelector(".ticker-element").classList.remove("working"); // decrease the size of the ticker element
@@ -124,9 +139,20 @@ function stopCountHandler() {
 
     if (activeBlock === "stopwatch") {
         Visual.toggleSecondsBlock("show");
+        Visual.updateHistoryBox(`Stopwatch was aborted after ${historyString}`);
     } else if (activeBlock === "until") {
         topControlsHandler("until"); // rendering the current time under the Until btn
+        console.log(Logic.getState());
+        const setTime = Logic.getUntilTime().map((x) => +x);
+        const historyBoxString = `Counting to <span>${setTime[0]}:${setTime[1]
+            .toString()
+            .padStart(2, 0)}</span> was aborted with ${historyString} remaining`; // getting the string of the set time
+        Visual.updateHistoryBox(historyBoxString); // updating history box
+    } else if (activeBlock === "timer") {
+        Visual.updateHistoryBox(`Timer for <span>${Logic.getTimerSetTime()}</span> was stopped with ${historyString} remaining`);
     }
+
+    Logic.setTimerIsRunning(); // setting that no timer is running, switching true to false
 }
 
 // ================================================================================================
@@ -134,8 +160,17 @@ function stopCountHandler() {
 // happens when I click pause to pause a countdown
 function pauseCountHandler(inputValuesArr) {
     const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
-    if (activeBlock == "until") {
+    const values = Visual.readValues().map((x) => +x);
+
+    if (activeBlock === "until") {
         Logic.setUntilPauseTime(new Date().toISOString());
+        const setTime = Logic.getUntilTime().map((x) => +x);
+        const historyBoxString = `Counting to <span>${setTime[0]}:${setTime[1].toString().padStart(2, 0)}</span> was paused`; // getting the string of the set time
+        Visual.updateHistoryBox(historyBoxString); // updating history box
+    } else if (activeBlock === "stopwatch") {
+        Visual.updateHistoryBox(`Stopwatch was paused`);
+    } else if (activeBlock === "timer") {
+        Visual.updateHistoryBox(`Timer for <span>${Logic.getTimerSetTime()}</span> was paused`);
     }
 
     Logic.stopTimer(); // stopping all interval timers
@@ -155,8 +190,10 @@ function resumeCountHandler(inputValuesArr) {
     if (activeBlock === "timer") {
         Logic.setTimerCurrentValues(asNumbers); // setting timer values in state
         Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
+        Visual.updateHistoryBox(`Timer for <span>${Logic.getTimerSetTime()}</span> is running`);
     } else if (activeBlock === "stopwatch") {
         Logic.startIntervalStopwatch(Visual.showTicking); // resuming
+        Visual.updateHistoryBox(`Stopwatch is running`);
     } else if (activeBlock == "until") {
         console.log(`resume until`);
         console.log(Logic.getState());
@@ -172,6 +209,10 @@ function resumeCountHandler(inputValuesArr) {
         Logic.startInterval(Visual.showTicking); // Logic.startInterval is an interval timer that runs every second
         Visual.changeStartBtnText("pause"); // changing the text of the Start btn
         Visual.toggleOptionSaveBtn("hide"); // hiding the Save This Option btn
+
+        const setTime = Logic.getUntilTime().map((x) => +x);
+        const historyString = `Counting to <span>${setTime[0]}:${setTime[1].toString().padStart(2, 0)}</span>`; // getting the string of the set time
+        Visual.updateHistoryBox(historyString); // updating history box
     }
 }
 

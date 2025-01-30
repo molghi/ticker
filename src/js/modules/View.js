@@ -32,6 +32,7 @@ class View {
         this.appBottomControlsEl = document.querySelector(".app__bottom-controls");
         this.appTopBtns = document.querySelector(".app__controls");
         this.h1 = document.querySelector("h1");
+        this.historyEl = document.querySelector(".app__history-box");
     }
 
     // ================================================================================================
@@ -224,10 +225,11 @@ class View {
         this.updateTitle(arr);
 
         if (arr.join("") === "000" && type === "timer") {
-            this.playSound();
-            console.log(
+            this.playSound(); // playing audio notification
+            this.updateHistoryBox(
                 `The countdown has finished at ${new Date().getHours()}:${new Date().getMinutes().toString().padStart(2, 0)}`
-            );
+            ); // updating history box
+
             setTimeout(() => {
                 // restoring the interface
                 document.querySelector(".ticker-element").classList.remove("working"); // decrease the size of the ticker element
@@ -338,6 +340,26 @@ class View {
     removeCurrentTime() {
         if (document.querySelector(".current-time")) document.querySelector(".current-time").remove();
     }
+    // ================================================================================================
+
+    updateHistoryBox(text, flag) {
+        this.historyEl.innerHTML = text;
+
+        // logging it in the console:
+        const date = new Date();
+        let formatted = date.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        });
+        formatted = formatted.replaceAll(",", "");
+
+        console.log(formatted + ":", text.replaceAll("<span>", "").replaceAll("</span>", ""));
+    }
+
     // ================================================================================================
 }
 

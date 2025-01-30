@@ -1,0 +1,79 @@
+@use "./initial";
+
+.color-changer {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    display: inline-block;
+    div {
+        border-radius: 50%;
+        background-color: var(--accent);
+        width: 33px;
+        height: 33px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        opacity: 0.3;
+        transition: opacity 0.2s;
+        svg {
+            width: 18px;
+            path {
+                fill: var(--bg);
+            }
+        }
+        &:hover {
+            opacity: 1;
+            box-shadow: none;
+            background-color: var(--accent);
+        }
+        &:active {
+            opacity: 0.3;
+        }
+    }
+}
+
+// ================================================================================================
+
+.current-time {
+    position: absolute;
+    bottom: -30px;
+    right: 0;
+    color: var(--accent);
+    font-size: 14px;
+    opacity: 0.75;
+    &:hover {
+        opacity: 1;
+    }
+    span {
+        animation: blinkTime 2s steps(1, start) infinite;
+    }
+}
+
+@keyframes blinkTime {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+// ================================================================================================
+
+.progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    div {
+        width: 0%;
+        height: 4px;
+        background-color: var(--accent);
+    }
+}
+
+// ================================================================================================

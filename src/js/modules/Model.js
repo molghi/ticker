@@ -1,11 +1,27 @@
 // Model is responsible for all logic in the app: all computations, calculations, and data operations
 
+// importing dependencies
 import LS from "./model-dependencies/localStorage.js";
+import {
+    startInterval,
+    resumeInterval,
+    stopTimer,
+    timerLogic,
+    startIntervalStopwatch,
+    stopwatchLogic,
+    everyMinTimer,
+    stopCurrentTimeTimer,
+    progressBarTimer,
+    stopProgressBarTimer,
+} from "./model-dependencies/timers.js";
+
+// ================================================================================================
 
 class Model {
     #state = {
         runningTimer: "",
         currentTimeTimer: "",
+        progressBarTimer: "",
         timer: {
             currentValues: [],
             quickOptions: [],
@@ -20,39 +36,45 @@ class Model {
         },
         accentColor: "",
         timerIsRunning: false,
-        progressBarTimer: "",
     };
 
     constructor() {
-        this.getQuickOptions(); // from LS
-        console.log(`state:`, this.#state);
-        this.getAccentColor(); // from LS
+        this.getQuickOptions(); // getting from LS
+        this.getAccentColor(); // getting from LS
+        // console.log(`state:`, this.#state);
     }
 
     // ================================================================================================
 
     getState = () => this.#state;
 
+    // resetting stopwatch values
     resetStopwatchValues = () => (this.#state.stopwatch.currentValues = [0, 0, 0]);
 
+    // getting the current/latest values of the timer
     getTimerCurrentValues = () => this.#state.timer.currentValues;
 
-    // setTimerCurrentValues = (arr) => this.#state.timer.currentValues.push(...arr, 0); // 0 here for seconds
+    // setting the current values of the timer
     setTimerCurrentValues = (arr) => {
         this.resetTimerValues();
         this.#state.timer.currentValues.push(...arr);
     };
 
+    // resetting timer values
     resetTimerValues = () => (this.#state.timer.currentValues = []);
 
+    // getting quick options
     getTimerQuickOptions = () => this.#state.timer.quickOptions;
 
+    // setting and getting Until time
     setUntilTime = (value) => (this.#state.until.setTime = value);
     getUntilTime = () => this.#state.until.setTime;
 
+    // setting and getting the time when Until was paused
     setUntilPauseTime = (value) => (this.#state.until.pausedTime = value);
     getUntilPauseTime = () => this.#state.until.pausedTime;
 
+    // setting and getting the time that was set in Timer
     pushTimerSetTime = (value) => (this.#state.timer.setTime = value);
     getTimerSetTime = () => {
         const raw = this.#state.timer.setTime;
@@ -62,32 +84,36 @@ class Model {
         return result.trim();
     };
 
+    // setting and getting the value of timerIsRunning
     setTimerIsRunning = () => (this.#state.timerIsRunning = !this.#state.timerIsRunning);
     getTimerIsRunning = () => this.#state.timerIsRunning;
 
     // ================================================================================================
 
+    // adding a quick option
     addQuickOption(arr) {
         const asNumbers = arr.map((x) => +x);
         const secondsRemoved = asNumbers.slice(0, 2);
-        const allSavedOptionsStringified = this.#state.timer.quickOptions.map((x) => x.toString());
+        const allSavedOptionsStringified = this.#state.timer.quickOptions.map((x) => x.toString()); // stringifying to check easier
         if (allSavedOptionsStringified.includes(secondsRemoved.toString())) return; // if what we are adding is already there, return
-        this.#state.timer.quickOptions.push(secondsRemoved);
-        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, reference type
+        this.#state.timer.quickOptions.push(secondsRemoved); // adding to state
+        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, as reference type
     }
 
     // ================================================================================================
 
+    // removing a quick option
     removeQuickOption(value) {
-        const allSavedOptionsStringified = this.#state.timer.quickOptions.map((x) => x.toString()); // to find it easily
+        const allSavedOptionsStringified = this.#state.timer.quickOptions.map((x) => x.toString()); // stringifying to check easier
         const index = allSavedOptionsStringified.findIndex((el) => el === value); // getting the index of this option
         if (index < 0) return;
-        this.#state.timer.quickOptions.splice(index, 1); // removing this option
-        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, reference type
+        this.#state.timer.quickOptions.splice(index, 1); // removing this option from state
+        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, as reference type
     }
 
     // ================================================================================================
 
+    // getting quick options from LS
     getQuickOptions() {
         const fetched = LS.get(`quickOptions`, "ref");
         if (!fetched) return;
@@ -96,113 +122,51 @@ class Model {
 
     // ================================================================================================
 
-    startTimer(arr) {
-        const [hours, minutes] = arr;
-        this.#state.timer.currentValues.push(hours, minutes);
-    }
-
-    // ================================================================================================
-
+    // starting timer
     startInterval(handler) {
-        clearInterval(this.#state.runningTimer); // clearing first before setting
-
-        handler(this.#state.timer.currentValues);
-        this.#state.runningTimer = setInterval(() => {
-            const [hours, minutes, seconds] = this.timerLogic(); // decreasing values (hours, minutes, seconds) happens here
-            handler([hours, minutes, seconds], "timer");
-        }, 1000); // every second
+        startInterval(handler);
     }
 
     // ================================================================================================
 
+    // resuming timer
     resumeInterval(handler) {
-        clearInterval(this.#state.runningTimer); // clearing first before setting
-
-        handler(this.#state.until.setTime);
-        this.#state.runningTimer = setInterval(() => {
-            const [hours, minutes, seconds] = this.timerLogic(); // decreasing values (hours, minutes, seconds) happens here
-            handler([hours, minutes, seconds], "timer");
-        }, 1000); // every second
+        resumeInterval(handler);
     }
 
     // ================================================================================================
 
+    // stopping runningTimer
     stopTimer() {
-        clearInterval(this.#state.runningTimer);
+        stopTimer();
     }
 
     // ================================================================================================
 
+    // timer logic
     timerLogic(type) {
-        let hours, minutes, seconds;
-        if (type === "until") {
-            hours = this.#state.until.setTime[0];
-            minutes = this.#state.until.setTime[1];
-            seconds = 0;
-        } else {
-            hours = this.#state.timer.currentValues[0];
-            minutes = this.#state.timer.currentValues[1];
-            seconds = this.#state.timer.currentValues[2];
-        }
-
-        seconds -= 1;
-        if (seconds < 0 && minutes > 0 && hours >= 0) {
-            seconds = 59;
-            minutes -= 1;
-            if (minutes === 0 && hours > 0) {
-                minutes = 59;
-                hours -= 1;
-            }
-        } else if (seconds < 0 && minutes === 0 && hours >= 0) {
-            seconds = 59;
-            minutes = 59;
-            hours -= 1;
-        } else if (seconds <= 0 && minutes <= 0 && hours <= 0) {
-            clearInterval(this.#state.runningTimer);
-        }
-
-        this.#state.timer.currentValues = [];
-        this.#state.timer.currentValues.push(hours, minutes, seconds);
-
-        return [hours, minutes, seconds];
+        timerLogic(type);
     }
 
     // ================================================================================================
 
+    // starting stopwatch
     startIntervalStopwatch(handler) {
-        clearInterval(this.#state.runningTimer); // clearing first before setting
-
-        handler(this.#state.stopwatch.currentValues);
-
-        this.#state.runningTimer = setInterval(() => {
-            const [hours, minutes, seconds] = this.stopwatchLogic(); // increasing values (hours, minutes, seconds) happens here
-            handler([hours, minutes, seconds], "stopwatch");
-        }, 1000); // every second
+        startIntervalStopwatch(handler);
     }
 
     // ================================================================================================
 
+    // stopwatch logic
     stopwatchLogic() {
-        let [hours, minutes, seconds] = this.#state.stopwatch.currentValues;
-
-        seconds += 1;
-        if (seconds > 59) {
-            seconds = 0;
-            minutes += 1;
-            if (minutes > 59) {
-                minutes = 0;
-                hours += 1;
-            }
-        }
-
-        this.#state.stopwatch.currentValues = [hours, minutes, seconds];
-        return [hours, minutes, seconds];
+        stopwatchLogic();
     }
 
     // ================================================================================================
 
+    // checking the accent color
     checkColor(string) {
-        // mimicking DOM addition
+        // mimicking DOM addition to read the computed style
         const div = document.createElement("div");
         div.style.color = string.trim().toLowerCase();
         document.body.appendChild(div);
@@ -214,14 +178,14 @@ class Model {
             .split(",")
             .map((x) => +x.trim()); // just the rgb values (r,g,b)
 
-        if (rgbValues[0] < 40 && rgbValues[1] < 40 && rgbValues[2] < 40) return `rgb(0, 128, 0)`; // return green if it is too dark
+        if (rgbValues[0] < 40 && rgbValues[1] < 40 && rgbValues[2] < 40) return `rgb(0, 128, 0)`; // return green if it is too dark (or incorrect like 'fred')
 
         return color;
     }
 
     // ================================================================================================
 
-    // get from LS
+    // getting accent color from LS
     getAccentColor() {
         const fetched = LS.get("timerAccentColor", "prim");
         if (!fetched) return;
@@ -230,6 +194,7 @@ class Model {
 
     // ================================================================================================
 
+    // changing accent color in state and LS
     changeAccentColor(color) {
         this.#state.accentColor = color;
         LS.save(`timerAccentColor`, this.#state.accentColor, "prim"); // pushing to LS, primitive type
@@ -237,10 +202,12 @@ class Model {
 
     // ================================================================================================
 
+    // returning the current value of accent color in state
     returnAccentColor = () => this.#state.accentColor;
 
     // ================================================================================================
 
+    // getting the now time
     getNowTime() {
         const now = new Date();
         const nowYear = now.getFullYear();
@@ -253,8 +220,8 @@ class Model {
 
     // ================================================================================================
 
+    // calculating the time difference between now and then (Until)
     calcTimeDifference(arr) {
-        console.log(arr);
         // 'arr' here is the array of strings which are the values that were in inputs in Until
         const [setHours, setMinutes] = arr;
         let [nowYear, nowMonth, nowDate, nowHours, nowMinutes, now] = this.getNowTime();
@@ -282,22 +249,21 @@ class Model {
 
     // ================================================================================================
 
+    // a timer for .current-time
     everyMinTimer(handler) {
-        this.stopCurrentTimeTimer(); // clearing first before setting
-
-        this.#state.currentTimeTimer = setInterval(() => {
-            handler();
-        }, 60000);
+        everyMinTimer(handler);
     }
 
     // ================================================================================================
 
+    // stopping the timer for .current-time
     stopCurrentTimeTimer() {
-        clearInterval(this.#state.currentTimeTimer);
+        stopCurrentTimeTimer();
     }
 
     // ================================================================================================
 
+    // calculate the percentage for the progress bar
     calcProgressBarPercentage() {
         const [timerHours, timerMinutes, timerSeconds] = this.#state.timer.currentValues;
         const finalTimeInSec = timerSeconds + timerMinutes * 60 + timerHours * 3600;
@@ -308,26 +274,17 @@ class Model {
 
     // ================================================================================================
 
+    // start the progress bar timer
     progressBarTimer(handler) {
-        this.stopProgressBarTimer();
-
-        const [timerHours, timerMinutes, timerSeconds] = this.#state.timer.currentValues;
-        const finalTimeInSec = timerSeconds + timerMinutes * 60 + timerHours * 3600;
-        this.#state.timer.finalTime = finalTimeInSec;
-
-        this.#state.progressBarTimer = setInterval(() => {
-            const percentage = this.calcProgressBarPercentage();
-            handler(percentage);
-        }, 1000);
+        progressBarTimer(handler);
     }
 
     // ================================================================================================
 
+    // stop the progress bar timer
     stopProgressBarTimer() {
-        clearInterval(this.#state.progressBarTimer);
+        stopProgressBarTimer();
     }
-
-    // ================================================================================================
 }
 
 export default Model;

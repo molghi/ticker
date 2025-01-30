@@ -1,3 +1,5 @@
+// handling some hotkeys here
+
 import { Visual, Logic, topControlsHandler } from "../../Controller.js";
 
 class KeyCommands {
@@ -5,10 +7,10 @@ class KeyCommands {
         this.listen();
     }
 
+    // ================================================================================================
+
     listen() {
         document.addEventListener("keydown", function (e) {
-            // 'keypress' is deprecated
-
             const timerIsRunning = Logic.getTimerIsRunning(); // is any timer running or not?
 
             if (e.code === `KeyQ` && !timerIsRunning) {
@@ -42,12 +44,12 @@ class KeyCommands {
                 if (timerIsRunning) return;
                 if (e.code === "Equal") currentCase = "increase minutes";
                 if (e.code === "Minus") currentCase = "decrease minutes";
-                Visual.timerVisualLogic(minutesInput, currentCase);
-                if (minutesInput.value !== "00") Visual.toggleOptionSaveBtn("show");
+                Visual.timerVisualLogic(minutesInput, currentCase); // handling the cases
+                if (minutesInput.value !== "00")
+                    Visual.toggleOptionSaveBtn("show"); // if input is 0, 'save to quick opts' is hidden
                 else Visual.toggleOptionSaveBtn("hide");
             }
 
-            // the following keys get re-rendered frequently
             if (e.code === `KeyC`) {
                 // commence/continue
                 const btn = document.querySelector(".ticker-element-command--start");
@@ -74,7 +76,7 @@ class KeyCommands {
             }
 
             if (e.code === `Digit2` && !timerIsRunning) {
-                // press the second Quick Option
+                // press the second Quick Option and so on
                 const btn = [...document.querySelectorAll(".ticker-element-option")][1];
                 if (btn) btn.click();
             }

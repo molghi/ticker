@@ -14,7 +14,6 @@ class LS {
 
     // save to local storage
     save(key, value, type = "prim") {
-        // if (type === "primitive")
         if (type.startsWith("prim")) {
             localStorage.setItem(key, value); // primitives need no JSON-stringifying
         } else {
@@ -26,7 +25,6 @@ class LS {
 
     // retrieve one from local storage
     get(key, type = "primitive") {
-        // if (type === "primitive")
         if (type.startsWith("prim")) {
             return localStorage.getItem(key); // primitives need no JSON-parsing
         } else {
@@ -71,4 +69,3 @@ class LS {
 }
 
 export default new LS(); // I export and instantiate it right here, so I don't have to instantiate it where I import it
-// export default LS

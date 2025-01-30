@@ -15,11 +15,11 @@ function resumeCountHandler(inputValuesArr) {
         Logic.startIntervalStopwatch(Visual.showTicking); // resuming
         Visual.updateHistoryBox(`Stopwatch is running`); // updating history box
     } else if (activeBlock == "until") {
-        const pauseTimeMinute = new Date(Logic.getUntilPauseTime()).getMinutes();
-        const nowMinute = new Date().getMinutes();
+        const pauseTime = new Date(Logic.getUntilPauseTime()).getTime(); // getting the time when it was paused
+        const nowTime = new Date().getTime(); // getting the now time
 
-        if (pauseTimeMinute !== nowMinute) {
-            // if the pause time (minutes) is the same as now time (minutes), we don't recalc the time difference
+        if (pauseTime !== nowTime) {
+            // if the pause time is not the same as now time, we recalc the time difference
             const [hours, minutes] = Logic.calcTimeDifference(Logic.getUntilTime()); // recalculating
             Logic.setTimerCurrentValues([hours, minutes, 0]); // setting timer values in state
         }
@@ -28,7 +28,7 @@ function resumeCountHandler(inputValuesArr) {
         Visual.changeStartBtnText("pause"); // changing the text of the Start btn
         Visual.toggleOptionSaveBtn("hide"); // hiding the Save This Option btn
 
-        const setTime = Logic.getUntilTime().map((x) => +x); // getting the until time that was set
+        const setTime = Logic.getUntilTime().map((x) => +x); // getting the until time that was originally set, to update history box
         const historyString = `Counting to <span>${setTime[0]}:${setTime[1].toString().padStart(2, 0)}</span>`; // getting the string of the set time
         Visual.updateHistoryBox(historyString); // updating history box
     }

@@ -1,5 +1,6 @@
 // View is responsible for everything that happens on the screen: rendering and all visual interactions with any elements
 
+// importing dependencies
 import {
     renderTicker,
     renderQuickOptions,
@@ -21,6 +22,8 @@ import {
     handleResumeClick,
     handleAddingOption,
 } from "./view-dependencies/eventHandlers.js";
+
+import timerVisualLogic from "./view-dependencies/timerVisualLogic.js";
 
 import countdownFinished from "../../sounds/countdown-finished.mp3";
 
@@ -44,34 +47,34 @@ class View {
 
     // ================================================================================================
 
+    // rendering the big ticker element: hours, minutes and maybe seconds too
     renderTicker(renderWhere, secondsFlag) {
-        renderTicker(renderWhere, secondsFlag);
-        this.handleTickerBtns();
-        this.handleStartStop();
-        // this.handleQuickOptions();
-        this.handleTickerInput();
+        renderTicker(renderWhere, secondsFlag); // rendering the ticker element
+        this.handleTickerBtns(); // listening to some ticker actions
+        this.handleStartStop(); // listening to some ticker actions
+        this.handleTickerInput(); // listening to some ticker actions
     }
 
     // ================================================================================================
 
+    // rendering .current-time
     renderCurrentTime(hrs, min) {
         renderCurrentTime(hrs, min);
     }
 
     // ================================================================================================
 
+    // handle clicks on "Timer", "Stopwatch", or "Until"
     handleTopControls(handler) {
         handleTopControls(handler);
     }
 
     // ================================================================================================
 
-    // remove .hidden from an element
+    // show an element
     show = (el) => el.classList.remove("hidden");
 
-    // ================================================================================================
-
-    // add .hidden to an element
+    // hide an element
     hide = (el) => el.classList.add("hidden");
 
     // ================================================================================================
@@ -92,76 +95,49 @@ class View {
 
     // ================================================================================================
 
+    // handle clicks on the color changer btn (bottom left)
     handleColorClick(handler) {
         handleColorClick(handler);
     }
 
     // ================================================================================================
 
+    // handle plus and minus btns of Hours or Minutes -- or save to quick options btn
     handleTickerBtns() {
         handleTickerBtns();
     }
 
     // ================================================================================================
 
+    // handle start/stop btns
     handleStartStop() {
         handleStartStop();
     }
 
     // ================================================================================================
 
+    // handle clicks on quick options
     handleQuickOptions(handler) {
         handleQuickOptions(handler);
     }
 
     // ================================================================================================
 
+    // dependency of 'handleTickerBtnsCallback' -- handling the cases, what happens visually in the interface until you press 'Start a Timer/Countdown'
     timerVisualLogic(input, concatted) {
-        // dependency of 'handleTickerBtnsCallback' -- handling the cases
-        let inputValue = input.value; // getting the input value
-        const formatIt = (value) => value.toString().padStart(2, 0); // little helper fn to format it nicely
-        // case 1
-        if (concatted === "increase minutes") {
-            inputValue = +inputValue + 1; // input here is minutes, increasing the value
-            if (inputValue === 60) {
-                inputValue = 0; // minutes are 0
-                const hoursInputEl = input.closest(".ticker-element").querySelector(".ticker-block--hours input"); // getting the hour element
-                hoursInputEl.value = formatIt(+hoursInputEl.value + 1); // hours: add one and padStart it
-            }
-            input.value = formatIt(inputValue); // updating the UI
-        }
-        // case 2
-        if (concatted === "decrease minutes") {
-            const hoursInputEl = input.closest(".ticker-element").querySelector(".ticker-block--hours input"); // getting the hour element
-            if (inputValue === "00" && hoursInputEl.value === "00") return;
-            else if (inputValue === "00" && hoursInputEl.value !== "00") {
-                hoursInputEl.value = formatIt(+hoursInputEl.value - 1); // decreasing the hours input value
-                input.value = "59";
-            } else {
-                inputValue = +inputValue - 1;
-                input.value = formatIt(inputValue);
-            }
-        }
-        // case 3
-        if (concatted === "increase hours") {
-            input.value = formatIt(+input.value + 1); // input here is hours, increasing the value
-        }
-        // case 4
-        if (concatted === "decrease hours") {
-            if (inputValue === "00") return;
-            else input.value = formatIt(+input.value - 1);
-        }
+        timerVisualLogic(input, concatted);
     }
 
     // ================================================================================================
 
+    // handle typing in any .ticker-element input
     handleTickerInput() {
         handleTickerInput();
     }
 
     // ================================================================================================
 
-    // return the values of inputs
+    // return the current values of inputs
     readValues() {
         const tickerEl = document.querySelector(".ticker-element");
         const allInputs = [...tickerEl.querySelectorAll("input")].map((inputEl) => inputEl.value);
@@ -170,46 +146,53 @@ class View {
 
     // ================================================================================================
 
+    // listening to my custom event 'clockstarts' that happens when I click start to start a countdown
     handleStartClick(handler) {
         handleStartClick(handler);
     }
 
     // ================================================================================================
 
+    // listening to my custom event 'clockstops' that happens when I click stop to stop a countdown
     handleStopClick(handler) {
         handleStopClick(handler);
     }
 
     // ================================================================================================
 
+    // listening to my custom event 'clockpauses' that happens when I click pause to pause a countdown
     handlePauseClick(handler) {
         handlePauseClick(handler);
     }
 
     // ================================================================================================
 
+    // listening to my custom event 'clockresumes' that happens when I click resume to resume a countdown
     handleResumeClick(handler) {
         handleResumeClick(handler);
     }
 
     // ================================================================================================
 
+    // rendering quick options
     renderQuickOptions(arr) {
         renderQuickOptions(arr);
-        this.handleQuickOptions();
+        this.handleQuickOptions(); // listening to some actions
     }
 
     // ================================================================================================
 
+    // listening to my custom event 'addoption' that happens when I click 'Save to Quick Options'
     handleAddingOption(handler) {
         handleAddingOption(handler);
     }
 
     // ================================================================================================
 
+    // plays a sound upon timer completion
     playSound() {
         const audio = new Audio(countdownFinished);
-        audio.volume = 0.25;
+        audio.volume = 0.25; // reducing the volume
 
         let playCount = 0;
         audio.play();
@@ -223,6 +206,7 @@ class View {
 
     // ================================================================================================
 
+    // updating timer values when it's ticking when a timer is active
     showTicking = (arr, type) => {
         const allInputs = [...document.querySelectorAll(".ticker-element input")];
         document.querySelector(".ticker-block--seconds").classList.remove("hidden"); // unhiding the seconds block
@@ -238,20 +222,26 @@ class View {
             ); // updating history box
 
             setTimeout(() => {
-                // restoring the interface
-                document.querySelector(".ticker-element").classList.remove("working"); // decrease the size of the ticker element
-                document.querySelector(".ticker-element").classList.remove("paused"); // removing the blinking class
-                this.toggleInterfaceDimmer("show"); // bring back the interface
-                this.resetInputValues(); // reset in the UI
-                this.toggleSecondsBlock("hide"); // hiding the seconds block
-                this.updateTitle(undefined, "restore"); // put 'Ticker' back in the title
-                this.changeStartBtnText("start"); // changing the text of Start btn
+                this.restoreInterface(); // restoring the interface in 15 secs (the time when the audio stops playing)
             }, 15000);
         }
     };
 
     // ================================================================================================
 
+    restoreInterface() {
+        document.querySelector(".ticker-element").classList.remove("working"); // decrease the size of the ticker element
+        document.querySelector(".ticker-element").classList.remove("paused"); // removing the blinking class
+        this.toggleInterfaceDimmer("show"); // bring back the interface
+        this.resetInputValues(); // reset in the UI
+        this.toggleSecondsBlock("hide"); // hiding the seconds block
+        this.updateTitle(undefined, "restore"); // put 'Ticker' back in the title
+        this.changeStartBtnText("start"); // changing the text of Start btn
+    }
+
+    // ================================================================================================
+
+    // making the interface dimmer when a timer is active
     toggleInterfaceDimmer(showFlag) {
         const optionsEl = document.querySelector(".ticker-element-options");
         const elements = [optionsEl, this.appTopBtns, this.h1];
@@ -270,12 +260,14 @@ class View {
 
     // ================================================================================================
 
+    // resetting input values
     resetInputValues() {
         [...document.querySelectorAll(".ticker-element input")].forEach((el) => (el.value = "00"));
     }
 
     // ================================================================================================
 
+    // toggle the visibility of the seconds block
     toggleSecondsBlock(showFlag) {
         if (showFlag === "hide") {
             document.querySelector(".ticker-block--seconds").classList.add("hidden");
@@ -286,6 +278,7 @@ class View {
 
     // ================================================================================================
 
+    // update document title
     updateTitle(arr, flag) {
         if (flag === "restore") return (document.title = "Ticker");
 
@@ -302,6 +295,7 @@ class View {
 
     // ================================================================================================
 
+    // change the text of the Start btn
     changeStartBtnText(changeTo) {
         const startBtn = document.querySelector(".ticker-element-command--start");
         if (changeTo === "pause") {
@@ -315,6 +309,7 @@ class View {
 
     // ================================================================================================
 
+    // toggle the visibility of the Save to Quick Options btn
     toggleOptionSaveBtn(flag) {
         const btn = document.querySelector(".ticker-block-btn-save");
         if (flag === "show") {
@@ -344,15 +339,17 @@ class View {
 
     // ================================================================================================
 
+    // removing .current-time
     removeCurrentTime() {
         if (document.querySelector(".current-time")) document.querySelector(".current-time").remove();
     }
     // ================================================================================================
 
+    // updating the history block in the bottom right
     updateHistoryBox(text, flag) {
         this.historyEl.innerHTML = text;
 
-        // logging it in the console:
+        // logging it in the console, longer history:
         const date = new Date();
         let formatted = date.toLocaleString("en-GB", {
             day: "2-digit",
@@ -363,29 +360,29 @@ class View {
             hour12: false,
         });
         formatted = formatted.replaceAll(",", "");
-
         console.log(formatted + ":", text.replaceAll("<span>", "").replaceAll("</span>", ""));
     }
 
     // ================================================================================================
 
+    // rendering the progress bar at the top
     renderProgressBar() {
         renderProgressBar();
     }
 
     // ================================================================================================
 
+    // removing the progress bar at the top
     removeProgressBar() {
         if (document.querySelector(".progress-bar")) document.querySelector(".progress-bar").remove();
     }
 
     // ================================================================================================
 
+    // updating the progress bar at the top
     updateProgressBar(percentageValue) {
         document.querySelector(".progress-bar div").style.width = percentageValue + "%";
     }
-
-    // ================================================================================================
 }
 
 export default View;

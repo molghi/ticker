@@ -11,24 +11,24 @@ function handleTopControls(handler) {
 
         const mainSections = [Visual.timerBlock, Visual.stopwatchBlock, Visual.tillBlock];
         const mainBtns = [Visual.timerBtn, Visual.stopwatchBtn, Visual.tillBtn];
-        mainSections.forEach((section) => Visual.hide(section)); // hiding all other sections
+        mainSections.forEach((section) => Visual.hide(section)); // hiding all sections: timer, stopwatch and until
         mainBtns.forEach((mainBtn) => mainBtn.classList.remove("active")); // removing .active from all top btns
         btnClicked.classList.add("active"); // adding .active to the clicked btn
 
         if (btnClickedType === "timer") {
-            Visual.show(Visual.timerBlock); // show timer, hide all the rest
-            Visual.renderTicker("timer");
-            Visual.toggleQuickOptions("show");
+            Visual.show(Visual.timerBlock); // show the timer section
+            Visual.renderTicker("timer"); // render ticker
+            Visual.toggleQuickOptions("show"); // show quick options
             handler(btnClickedType);
         } else if (btnClickedType === "stopwatch") {
-            Visual.show(Visual.stopwatchBlock); // show stopwatch, hide all the rest
+            Visual.show(Visual.stopwatchBlock); // show stopwatch section
             Visual.renderTicker("stopwatch", true); // true means render the seconds block too
-            Visual.toggleQuickOptions("hide");
+            Visual.toggleQuickOptions("hide"); // hide quick options
             handler(btnClickedType);
         } else if (btnClickedType === "until") {
-            Visual.show(Visual.tillBlock); // show until, hide all the rest
-            Visual.renderTicker("until");
-            Visual.toggleQuickOptions("hide");
+            Visual.show(Visual.tillBlock); // show until section
+            Visual.renderTicker("until"); // render ticker
+            Visual.toggleQuickOptions("hide"); // hide quick options
             handler(btnClickedType);
         }
     });
@@ -45,7 +45,7 @@ function handleColorClick(handler) {
 
 // ================================================================================================
 
-// handle plus and minus btns of Hours or Minutes -- or save to quick options btn
+// handle plus and minus UI btns of Hours or Minutes -- or save to quick options btn
 function handleTickerBtns() {
     document.querySelector(".ticker-element").addEventListener("click", handleTickerBtnsCallback); // I remove it in renderMethods.js
 }
@@ -53,16 +53,17 @@ function handleTickerBtns() {
 // dependency of 'handleTickerBtns'
 function handleTickerBtnsCallback(e) {
     const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
+
     if (!e.target.classList.contains("ticker-block-btn") && !e.target.classList.contains("ticker-block-btn-save")) return;
     const clickedBtn = e.target;
+
     if (clickedBtn.classList.contains("ticker-block-btn-save")) {
         // it was a click on "save to quick options"
         const values = Visual.readValues(); // reading the input values
-        // Emitting a custom event
-        const customEvent = new CustomEvent("addoption", { detail: { inputValues: values } });
-        document.dispatchEvent(customEvent);
+        const customEvent = new CustomEvent("addoption", { detail: { inputValues: values } }); // creating a custom event
+        document.dispatchEvent(customEvent); // dispatching it
     } else {
-        // it was a click on plus and minus UI btns of Hours or Minutes
+        // it was a click on plus or minus UI btns of Hours or Minutes
         const clickedBtnType = clickedBtn.textContent.trim() === `+` ? "increase" : "decrease"; // determining clicked btn type
         const clickedItem = clickedBtn.closest(".ticker-block"); // to determine if it is a btn of Hours or Minutes
         const clickedItemType = clickedItem.classList.contains("ticker-block--hours") ? "hours" : "minutes";
@@ -70,12 +71,10 @@ function handleTickerBtnsCallback(e) {
 
         const concatted = `${clickedBtnType} ${clickedItemType}`; // concatting to handle cases
         Visual.timerVisualLogic(input, concatted); // handling the cases
-        if (input.value !== "00") {
-            // "save to quick options" only shows if the input value is not 0
-            Visual.toggleOptionSaveBtn("show");
-        } else {
-            Visual.toggleOptionSaveBtn("hide");
-        }
+
+        if (input.value !== "00")
+            Visual.toggleOptionSaveBtn("show"); // "save to quick options" only shows if the input value is not 0
+        else Visual.toggleOptionSaveBtn("hide");
 
         if (activeBlock === "until") {
             // when in Until, hours cannot be more than 23
@@ -98,10 +97,11 @@ function handleTickerInput() {
 // dependency of 'handleTickerInput'
 function handleTickerInputCallback(e) {
     const activeBlock = Visual.defineActiveBlock(); // finding what block is active now: timer, stopwatch or until
-    const acceptedValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", undefined];
-    // if input was just one char, inputValue[1] returns undefined, that's why undef is in acceptedValues
+    const acceptedValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", undefined]; // if input was just one char, inputValue[1] returns undefined, that's why undef is in acceptedValues
+
     const inputValue = e.target.value;
-    if (inputValue !== "00" && inputValue !== "0") Visual.toggleOptionSaveBtn("show");
+    if (inputValue !== "00" && inputValue !== "0")
+        Visual.toggleOptionSaveBtn("show"); // if input is 0, 'save to quick options' btn is hidden
     else Visual.toggleOptionSaveBtn("hide");
 
     const inputType = e.target.closest(".ticker-block").classList.contains("ticker-block--minutes") ? "minutes" : "hours"; // determining if it's an input of Hours or Minutes
@@ -129,25 +129,23 @@ function handleStartStop() {
 function handleStartStopCallback(e) {
     if (!e.target.classList.contains("ticker-element-command")) return;
     const clickedBtn = e.target;
+
     let clickedBtnType; // determining clicked btn type below
     if (clickedBtn.textContent.trim().toLowerCase() === `start`) clickedBtnType = "start";
     else if (clickedBtn.textContent.trim().toLowerCase() === `stop`) clickedBtnType = "stop";
     else if (clickedBtn.textContent.trim().toLowerCase() === `pause`) clickedBtnType = "pause";
     else if (clickedBtn.textContent.trim().toLowerCase() === `resume`) clickedBtnType = "resume";
 
-    const valuesArr = Visual.readValues(); // the values of inputs
+    const valuesArr = Visual.readValues(); // getting the values of inputs
 
     if (clickedBtnType === "start") {
-        // Emitting a custom event
-        const customEvent = new CustomEvent("clockstarts", { detail: { inputValues: valuesArr } });
-        document.dispatchEvent(customEvent);
+        const customEvent = new CustomEvent("clockstarts", { detail: { inputValues: valuesArr } }); // creating a custom event
+        document.dispatchEvent(customEvent); // dispatching it
     } else if (clickedBtnType === "pause") {
-        // Emitting a custom event
         const customEvent = new CustomEvent("clockpauses", { detail: { inputValues: valuesArr } });
         document.dispatchEvent(customEvent);
-        Visual.changeStartBtnText("resume");
+        Visual.changeStartBtnText("resume"); // changing the text of the Start btn
     } else if (clickedBtnType === "resume") {
-        // Emitting a custom event
         const customEvent = new CustomEvent("clockresumes", { detail: { inputValues: valuesArr } });
         document.dispatchEvent(customEvent);
         Visual.changeStartBtnText("pause");
@@ -198,7 +196,7 @@ function handleAddingOption(handler) {
 
 // handle clicks on quick options
 function handleQuickOptions(handler) {
-    Visual.quickOptionsHandler = handler;
+    Visual.quickOptionsHandler = handler; // storing the ref to the handler fn
     document.querySelector(".ticker-element-options").addEventListener("click", handleQuickOptionsCallback); // I remove it in renderMethods.js
 }
 

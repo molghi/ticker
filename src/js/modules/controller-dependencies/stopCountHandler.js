@@ -29,8 +29,12 @@ function stopCountHandler() {
             .toString()
             .padStart(2, 0)}</span> was aborted with ${historyString} remaining`; // getting the string of the set time
         Visual.updateHistoryBox(historyBoxString); // updating history box
+        Visual.removeProgressBar(); // removing the progress bar at the top that shows the remaining time in the running timer
+        Logic.stopProgressBarTimer();
     } else if (activeBlock === "timer") {
         Visual.updateHistoryBox(`Timer for <span>${Logic.getTimerSetTime()}</span> was stopped with ${historyString} remaining`); // updating history box
+        Visual.removeProgressBar(); // removing the progress bar at the top that shows the remaining time in the running timer
+        Logic.stopProgressBarTimer();
     }
 
     Logic.setTimerIsRunning(); // setting that no timer is running, switching true to false

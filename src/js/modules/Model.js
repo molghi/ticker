@@ -10,6 +10,7 @@ class Model {
             currentValues: [],
             quickOptions: [],
             setTime: [],
+            timestamp: "",
         },
         stopwatch: {
             currentValues: [0, 0, 0],
@@ -19,6 +20,7 @@ class Model {
         },
         accentColor: "",
         timerIsRunning: false,
+        progressBarTimer: "",
     };
 
     constructor() {
@@ -292,6 +294,37 @@ class Model {
 
     stopCurrentTimeTimer() {
         clearInterval(this.#state.currentTimeTimer);
+    }
+
+    // ================================================================================================
+
+    calcProgressBarPercentage() {
+        const [timerHours, timerMinutes, timerSeconds] = this.#state.timer.currentValues;
+        const finalTimeInSec = timerSeconds + timerMinutes * 60 + timerHours * 3600;
+        const x = ((finalTimeInSec / this.#state.timer.finalTime) * 100).toFixed(2);
+        const percentage = (100 - x).toFixed(2);
+        return percentage;
+    }
+
+    // ================================================================================================
+
+    progressBarTimer(handler) {
+        this.stopProgressBarTimer();
+
+        const [timerHours, timerMinutes, timerSeconds] = this.#state.timer.currentValues;
+        const finalTimeInSec = timerSeconds + timerMinutes * 60 + timerHours * 3600;
+        this.#state.timer.finalTime = finalTimeInSec;
+
+        this.#state.progressBarTimer = setInterval(() => {
+            const percentage = this.calcProgressBarPercentage();
+            handler(percentage);
+        }, 1000);
+    }
+
+    // ================================================================================================
+
+    stopProgressBarTimer() {
+        clearInterval(this.#state.progressBarTimer);
     }
 
     // ================================================================================================

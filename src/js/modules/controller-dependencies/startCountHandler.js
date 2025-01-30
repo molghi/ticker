@@ -16,6 +16,8 @@ function startCountHandler(inputValuesArr) {
         const setTime = Logic.getTimerSetTime(); // getting the string of the set time
         const historyString = `Timer for <span>${setTime}</span> is running`; // composing the text for history-box
         Visual.updateHistoryBox(historyString); // updating history box
+        Visual.renderProgressBar();
+        Logic.progressBarTimer(Visual.updateProgressBar);
     } else if (activeBlock === "stopwatch") {
         Logic.resetStopwatchValues(); // resetting values to all zeroes
         Logic.startIntervalStopwatch(Visual.showTicking); // start ticking
@@ -34,6 +36,9 @@ function startCountHandler(inputValuesArr) {
         const setTime = Logic.getUntilTime().map((x) => +x);
         const historyString = `Counting to <span>${setTime[0]}:${setTime[1].toString().padStart(2, 0)}</span>`; // getting the string of the set time
         Visual.updateHistoryBox(historyString); // updating history box
+        console.log(`show progress bar`);
+        Visual.renderProgressBar();
+        Logic.progressBarTimer(Visual.updateProgressBar);
     }
 
     Logic.setTimerIsRunning(); // setting that a timer is running, switching false to true

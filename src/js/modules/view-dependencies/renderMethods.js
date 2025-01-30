@@ -14,7 +14,6 @@ function renderTicker(renderWhere, secondsFlag = false) {
     if (document.querySelector(".ticker-element")) {
         // removing event listeners first
         document.querySelector(".ticker-element").removeEventListener("click", handleTickerBtnsCallback);
-        document.querySelector(".ticker-element-options").removeEventListener("click", handleQuickOptionsCallback);
         [...document.querySelectorAll(".ticker-element input")].forEach((inputEl) =>
             inputEl.removeEventListener("input", handleTickerInputCallback)
         );
@@ -83,7 +82,10 @@ function renderStartStopBtns() {
 // ================================================================================================
 
 function renderQuickOptions(optionsArr) {
-    if (document.querySelector(".ticker-element-options")) document.querySelector(".ticker-element-options").remove(); // removing before rendering/re-rendering
+    if (document.querySelector(".ticker-element-options")) {
+        document.querySelector(".ticker-element-options").removeEventListener("click", handleQuickOptionsCallback);
+        document.querySelector(".ticker-element-options").remove(); // removing before rendering/re-rendering
+    }
 
     const div = document.createElement("div");
     div.classList.add("ticker-element-options");
@@ -130,4 +132,15 @@ function renderCurrentTime(hours, minutes) {
 
 // ================================================================================================
 
-export { renderTicker, renderQuickOptions, renderColorBtn, renderCurrentTime };
+function renderProgressBar() {
+    Visual.removeProgressBar(); // removing (if any) before rendering
+
+    const div = document.createElement("div");
+    div.classList.add("progress-bar");
+    div.innerHTML = `<div></div>`;
+    Visual.sectionEl.appendChild(div);
+}
+
+// ================================================================================================
+
+export { renderTicker, renderQuickOptions, renderColorBtn, renderCurrentTime, renderProgressBar };

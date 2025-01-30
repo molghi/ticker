@@ -1,6 +1,13 @@
 // View is responsible for everything that happens on the screen: rendering and all visual interactions with any elements
 
-import { renderTicker, renderQuickOptions, renderColorBtn, renderCurrentTime } from "./view-dependencies/renderMethods.js";
+import {
+    renderTicker,
+    renderQuickOptions,
+    renderColorBtn,
+    renderCurrentTime,
+    renderProgressBar,
+} from "./view-dependencies/renderMethods.js";
+
 import {
     handleTopControls,
     handleColorClick,
@@ -32,6 +39,7 @@ class View {
         this.appTopBtns = document.querySelector(".app__controls");
         this.h1 = document.querySelector("h1");
         this.historyEl = document.querySelector(".app__history-box");
+        this.sectionEl = document.querySelector(".section");
     }
 
     // ================================================================================================
@@ -357,6 +365,24 @@ class View {
         formatted = formatted.replaceAll(",", "");
 
         console.log(formatted + ":", text.replaceAll("<span>", "").replaceAll("</span>", ""));
+    }
+
+    // ================================================================================================
+
+    renderProgressBar() {
+        renderProgressBar();
+    }
+
+    // ================================================================================================
+
+    removeProgressBar() {
+        if (document.querySelector(".progress-bar")) document.querySelector(".progress-bar").remove();
+    }
+
+    // ================================================================================================
+
+    updateProgressBar(percentageValue) {
+        document.querySelector(".progress-bar div").style.width = percentageValue + "%";
     }
 
     // ================================================================================================

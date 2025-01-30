@@ -1,6 +1,5 @@
 // View is responsible for everything that happens on the screen: rendering and all visual interactions with any elements
 
-import KeyCommands from "./view-dependencies/keyCommands.js";
 import { renderTicker, renderQuickOptions, renderColorBtn, renderCurrentTime } from "./view-dependencies/renderMethods.js";
 import {
     handleTopControls,

@@ -281,11 +281,17 @@ class Model {
     // ================================================================================================
 
     everyMinTimer(handler) {
-        clearInterval(this.#state.currentTimeTimer); // clearing first before setting
+        this.stopCurrentTimeTimer(); // clearing first before setting
 
         this.#state.currentTimeTimer = setInterval(() => {
             handler();
         }, 60000);
+    }
+
+    // ================================================================================================
+
+    stopCurrentTimeTimer() {
+        clearInterval(this.#state.currentTimeTimer);
     }
 
     // ================================================================================================

@@ -207,7 +207,7 @@ function handleQuickOptionsCallback(e) {
         return;
     const clickedBtn = e.target.closest("button");
     const clickedTag = e.target.tagName;
-    let actionName;
+    let actionName = "";
     if (clickedTag === "BUTTON") actionName = "start";
     if (clickedTag === "SPAN") actionName = "remove";
     Visual.quickOptionsHandler(actionName, clickedBtn);

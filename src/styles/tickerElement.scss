@@ -76,6 +76,7 @@
 }
 
 .ticker-element-commands {
+    order: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,6 +108,7 @@
 }
 
 .ticker-element-options {
+    order: 2;
     color: var(--accent);
     display: flex;
     align-items: center;

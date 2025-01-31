@@ -15,11 +15,14 @@ function resumeCountHandler(inputValuesArr) {
         Logic.startIntervalStopwatch(Visual.showTicking); // resuming
         Visual.updateHistoryBox(`Stopwatch is running`); // updating history box
     } else if (activeBlock == "until") {
-        const pauseTime = new Date(Logic.getUntilPauseTime()).getTime(); // getting the time when it was paused
-        const nowTime = new Date().getTime(); // getting the now time
+        const pauseTime = new Date(Logic.getUntilPauseTime()); // getting the time when it was paused
+        const nowTime = new Date(); // getting the now time
 
-        if (pauseTime !== nowTime) {
-            // if the pause time is not the same as now time, we recalc the time difference
+        pauseTime.setSeconds(0, 0); // setting both times to the same minute level ignoring seconds and milliseconds
+        nowTime.setSeconds(0, 0); // ensuring that both times are set to 00 seconds and 00 milliseconds
+
+        if (pauseTime.getTime() !== nowTime.getTime()) {
+            // if the pause time is not the same as now time (on a minute level), recalc the time difference
             const [hours, minutes] = Logic.calcTimeDifference(Logic.getUntilTime()); // recalculating
             Logic.setTimerCurrentValues([hours, minutes, 0]); // setting timer values in state
         }

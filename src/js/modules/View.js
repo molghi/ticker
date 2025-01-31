@@ -82,8 +82,17 @@ class View {
     // toggle the visibility of .ticker-element-options
     toggleQuickOptions(showFlag) {
         const block = document.querySelector(".ticker-element-options");
+        if (!block) return;
         if (showFlag === "show") block.classList.remove("hidden");
         else block.classList.add("hidden");
+    }
+
+    // ================================================================================================
+
+    // blurring inputs when a timer is active
+    blurInputs() {
+        const allInputs = [...document.querySelectorAll(".ticker-element input")];
+        allInputs.forEach((x) => x.blur());
     }
 
     // ================================================================================================
@@ -382,6 +391,19 @@ class View {
     // updating the progress bar at the top
     updateProgressBar(percentageValue) {
         document.querySelector(".progress-bar div").style.width = percentageValue + "%";
+    }
+
+    // ================================================================================================
+
+    // blinking .app briefly
+    blinkApp() {
+        // this.appBlock
+        // document.querySelector(".ticker-element").style.transition = "opacity 0.2s";
+        // document.querySelector(".ticker-element").style.opacity = 0;
+        document.querySelector(".ticker-element").style.animation = `shortBlink 0.5s ease 0s 1 both`;
+        setTimeout(() => {
+            // document.querySelector(".ticker-element").style.opacity = 1;
+        }, 200);
     }
 }
 

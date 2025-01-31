@@ -41,7 +41,6 @@ class Model {
     constructor() {
         this.getQuickOptions(); // getting from LS
         this.getAccentColor(); // getting from LS
-        // console.log(`state:`, this.#state);
     }
 
     // ================================================================================================
@@ -97,7 +96,7 @@ class Model {
         const allSavedOptionsStringified = this.#state.timer.quickOptions.map((x) => x.toString()); // stringifying to check easier
         if (allSavedOptionsStringified.includes(secondsRemoved.toString())) return; // if what we are adding is already there, return
         this.#state.timer.quickOptions.push(secondsRemoved); // adding to state
-        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, as reference type
+        LS.save(`timerQuickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, as reference type
     }
 
     // ================================================================================================
@@ -108,14 +107,14 @@ class Model {
         const index = allSavedOptionsStringified.findIndex((el) => el === value); // getting the index of this option
         if (index < 0) return;
         this.#state.timer.quickOptions.splice(index, 1); // removing this option from state
-        LS.save(`quickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, as reference type
+        LS.save(`timerQuickOptions`, this.#state.timer.quickOptions, "ref"); // pushing to LS, as reference type
     }
 
     // ================================================================================================
 
     // getting quick options from LS
     getQuickOptions() {
-        const fetched = LS.get(`quickOptions`, "ref");
+        const fetched = LS.get(`timerQuickOptions`, "ref");
         if (!fetched) return;
         fetched.forEach((arr) => this.#state.timer.quickOptions.push(arr));
     }
@@ -179,7 +178,6 @@ class Model {
             .map((x) => +x.trim()); // just the rgb values (r,g,b)
 
         if (rgbValues[0] < 40 && rgbValues[1] < 40 && rgbValues[2] < 40) return `rgb(0, 128, 0)`; // return green if it is too dark (or incorrect like 'fred')
-
         return color;
     }
 
@@ -236,8 +234,10 @@ class Model {
 
         whichDay === "next" && nowDate++; // if it is the next day, increment the now day value
 
-        let thenTime = `${nowYear}-${nowMonth.toString().padStart(2, 0)}-${nowDate}T${setHours}:${setMinutes}`; // 2025-01-27T14:30
-        thenTime = new Date(thenTime).getTime();
+        // nowDate = nowDate === 32 && "01";
+        // let thenTime = `${nowYear}-${nowMonth.toString().padStart(2, 0)}-${nowDate}T${setHours}:${setMinutes}`; // 2025-01-27T14:30
+        // thenTime = new Date(thenTime).getTime();
+        let thenTime = new Date(nowYear, nowMonth - 1, nowDate, setHours, setMinutes).getTime();
 
         const difference = thenTime - nowTime;
         const seconds = Math.floor(difference / 1000);

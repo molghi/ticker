@@ -1,4 +1,5 @@
 import { Logic, Visual } from "../../Controller.js";
+import View from "../View.js";
 
 // happens when I click start to start a countdown
 function startCountHandler(inputValuesArr) {
@@ -39,6 +40,7 @@ function startCountHandler(inputValuesArr) {
         Logic.progressBarTimer(Visual.updateProgressBar); // making the progress bar update every sec
     }
 
+    Visual.blurInputs(); // blurring inputs when a timer is active
     Logic.setTimerIsRunning(); // setting that a timer is running, switching false to true
 }
 

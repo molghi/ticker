@@ -100,16 +100,16 @@ function handleTickerInputCallback(e) {
     const acceptedValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", undefined]; // if input was just one char, inputValue[1] returns undefined, that's why undef is in acceptedValues
 
     const inputValue = e.target.value;
-    if (inputValue !== "00" && inputValue !== "0")
-        Visual.toggleOptionSaveBtn("show"); // if input is 0, 'save to quick options' btn is hidden
-    else Visual.toggleOptionSaveBtn("hide");
-
     const inputType = e.target.closest(".ticker-block").classList.contains("ticker-block--minutes") ? "minutes" : "hours"; // determining if it's an input of Hours or Minutes
     if (inputType === "minutes" && +inputValue > 59) e.target.value = "00"; // minutes cannot be more than 59
     const replaceValue = "0";
     // making sure it doesn't contain any unaccepted characters
-    if (!acceptedValues.includes(inputValue[0])) e.target.value = replaceValue + e.target.value.slice(1, 2);
-    if (!acceptedValues.includes(inputValue[1])) e.target.value = e.target.value.slice(0, 1) + replaceValue;
+    if (!acceptedValues.includes(inputValue[0])) e.target.value = replaceValue + inputValue[1];
+    if (!acceptedValues.includes(inputValue[1])) e.target.value = inputValue[0] + replaceValue;
+
+    if (e.target.value !== "00" && e.target.value !== "0")
+        Visual.toggleOptionSaveBtn("show"); // if input is 0, 'save to quick options' btn is hidden
+    else Visual.toggleOptionSaveBtn("hide");
 
     if (activeBlock === "until") {
         // when in Until, hours cannot be more than 23

@@ -69,49 +69,51 @@ class KeyCommands {
                 document.querySelector(".ticker-element-command--stop").click();
             }
 
-            if (e.code === `Digit1` && !timerIsRunning) {
+            const activeElementTag = document.activeElement.tagName; // if I type numbers in an input field, this should not trigger all these things below
+
+            if (e.code === `Digit1` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 // press the first Quick Option
                 const btn = document.querySelector(".ticker-element-option");
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit2` && !timerIsRunning) {
+            if (e.code === `Digit2` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 // press the second Quick Option and so on
                 const btn = [...document.querySelectorAll(".ticker-element-option")][1];
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit3` && !timerIsRunning) {
+            if (e.code === `Digit3` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 const btn = [...document.querySelectorAll(".ticker-element-option")][2];
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit4` && !timerIsRunning) {
+            if (e.code === `Digit4` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 const btn = [...document.querySelectorAll(".ticker-element-option")][3];
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit5` && !timerIsRunning) {
+            if (e.code === `Digit5` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 const btn = [...document.querySelectorAll(".ticker-element-option")][4];
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit6` && !timerIsRunning) {
+            if (e.code === `Digit6` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 const btn = [...document.querySelectorAll(".ticker-element-option")][5];
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit7` && !timerIsRunning) {
+            if (e.code === `Digit7` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 const btn = [...document.querySelectorAll(".ticker-element-option")][6];
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit8` && !timerIsRunning) {
+            if (e.code === `Digit8` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 const btn = [...document.querySelectorAll(".ticker-element-option")][7];
                 if (btn) btn.click();
             }
 
-            if (e.code === `Digit9` && !timerIsRunning) {
+            if (e.code === `Digit9` && !timerIsRunning && activeBlock === "timer" && activeElementTag !== "INPUT") {
                 const btn = [...document.querySelectorAll(".ticker-element-option")][8];
                 if (btn) btn.click();
             }

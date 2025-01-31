@@ -77,7 +77,7 @@ function startIntervalStopwatch(handler) {
     handler(Logic.getState().stopwatch.currentValues);
 
     Logic.getState().runningTimer = setInterval(() => {
-        const [hours, minutes, seconds] = Logic.stopwatchLogic(); // increasing values (hours, minutes, seconds) happens here
+        const [hours, minutes, seconds] = stopwatchLogic(); // increasing values (hours, minutes, seconds) happens here
         handler([hours, minutes, seconds], "stopwatch");
     }, 1000); // every second
 }

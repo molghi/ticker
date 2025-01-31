@@ -101,6 +101,13 @@ $md4: 479.98; // for small phones
 
 // =============================================================================================
 
+.section {
+    // @media (min-height: 850px) {
+    @media (min-height: 1080px) {
+        height: 100%;
+    }
+}
+
 .container {
     max-width: $mw + px;
     margin: 0 auto;
@@ -118,6 +125,16 @@ $md4: 479.98; // for small phones
         max-width: none;
         padding: 0 10px;
     }
+
+    // @media (min-height: 850px) {
+    @media (min-height: 1080px) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        margin-top: -80px;
+    }
 }
 
 // =============================================================================================
@@ -132,6 +149,10 @@ h1 {
 
     &:hover {
         opacity: 1;
+    }
+
+    @media (max-width: #{$md4 + 'px'}) {
+        margin-bottom: 20px;
     }
 }
 

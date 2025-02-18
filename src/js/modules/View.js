@@ -246,6 +246,7 @@ class View {
         this.toggleSecondsBlock("hide"); // hiding the seconds block
         this.updateTitle(undefined, "restore"); // put 'Ticker' back in the title
         this.changeStartBtnText("start"); // changing the text of Start btn
+        this.removeProgressBar();
     }
 
     // ================================================================================================
@@ -390,7 +391,8 @@ class View {
 
     // updating the progress bar at the top
     updateProgressBar(percentageValue) {
-        document.querySelector(".progress-bar div").style.width = percentageValue + "%";
+        if (document.querySelector(".progress-bar"))
+            document.querySelector(".progress-bar div").style.width = percentageValue + "%";
     }
 
     // ================================================================================================

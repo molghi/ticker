@@ -43,6 +43,7 @@ class View {
         this.h1 = document.querySelector("h1");
         this.historyEl = document.querySelector(".app__history-box");
         this.sectionEl = document.querySelector(".section");
+        this.audio = "";
     }
 
     // ================================================================================================
@@ -200,16 +201,16 @@ class View {
 
     // plays a sound upon timer completion
     playSound() {
-        const audio = new Audio(countdownFinished);
-        audio.volume = 0.25; // reducing the volume
+        this.audio = new Audio(countdownFinished);
+        this.audio.volume = 0.25; // reducing the volume
 
         let playCount = 0;
-        audio.play();
+        this.audio.play();
 
-        audio.onended = () => {
+        this.audio.onended = () => {
             // using an event listener to replay the audio 3 times
             playCount++;
-            if (playCount < 3) audio.play();
+            if (playCount < 3) this.audio.play();
         };
     }
 
